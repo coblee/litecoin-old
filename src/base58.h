@@ -244,7 +244,7 @@ class CBitcoinAddress : public CBase58Data
 public:
     bool SetHash160(const uint160& hash160)
     {
-        SetData(fTestNet ? 111 : 0, &hash160, 20);
+        SetData(fTestNet ? 111 : 48, &hash160, 20); // Litecoin addresses start with L
         return true;
     }
 
@@ -259,7 +259,7 @@ public:
         bool fExpectTestNet = false;
         switch(nVersion)
         {
-            case 0:
+            case 48: // Litecoin addresses start with L
                 break;
 
             case 111:

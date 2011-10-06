@@ -47,7 +47,7 @@ void GUIUtil::setupAmountWidget(QLineEdit *widget, QWidget *parent)
 
 bool GUIUtil::parseBitcoinURL(const QUrl *url, SendCoinsRecipient *out)
 {
-    if(url->scheme() != QString("bitcoin"))
+    if(url->scheme() != QString("litecoin"))
         return false;
 
     SendCoinsRecipient rv;

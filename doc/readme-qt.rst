@@ -1,4 +1,4 @@
-Bitcoin-qt: Qt4 based GUI replacement for Bitcoin
+Litecoin-qt: Qt4 based GUI replacement for Litecoin
 =================================================
 
 Features
@@ -26,13 +26,13 @@ Features
 
 - Sendmany support, send to multiple recipients at the same time
 
-- Multiple unit support, can show subdivided bitcoins (uBTC, mBTC) for users that like large numbers
+- Multiple unit support, can show subdivided litecoins (uBTC, mBTC) for users that like large numbers
 
 - Support for English, German, Russian and Dutch languages
 
 - Address books and transaction table can be sorted by any column
 
-- Accepts "bitcoin:" URLs from browsers and other sources through drag and drop
+- Accepts "litecoin:" URLs from browsers and other sources through drag and drop
 
 Build instructions
 ===================
@@ -56,9 +56,9 @@ then execute the following:
     qmake
     make
 
-Alternatively, install Qt Creator and open the `bitcoin-qt.pro` file.
+Alternatively, install Qt Creator and open the `litecoin-qt.pro` file.
 
-An executable named `bitcoin-qt` will be built.
+An executable named `litecoin-qt` will be built.
 
 
 Windows
@@ -106,7 +106,7 @@ Build configuration options
 UPNnP port forwarding
 ---------------------
 
-To use UPnP for port forwarding behind a NAT router (recommended, as more connections overall allow for a faster and more stable bitcoin experience), pass the following argument to qmake:
+To use UPnP for port forwarding behind a NAT router (recommended, as more connections overall allow for a faster and more stable litecoin experience), pass the following argument to qmake:
 
 ::
 
@@ -132,7 +132,7 @@ You can execute the following commands in a terminal to install it:
 
 ::
 
-	cd <location of bitcoin-qt>/contrib/miniupnpc
+        cd <location of litecoin-qt>/contrib/miniupnpc
 	sudo port install
 
 Notification support for recent (k)ubuntu versions
@@ -148,9 +148,9 @@ FreeDesktop notification interface through DBUS using the following qmake option
 Berkely DB version warning
 ==========================
 
-A warning for people using the *static binary* version of Bitcoin on a Linux/UNIX-ish system (tl;dr: **Berkely DB databases are not forward compatible**).
+A warning for people using the *static binary* version of Litecoin on a Linux/UNIX-ish system (tl;dr: **Berkely DB databases are not forward compatible**).
 
-The static binary version of Bitcoin is linked against libdb4.7 or libdb4.8 (see also `this Debian issue`_).
+The static binary version of Litecoin is linked against libdb4.7 or libdb4.8 (see also `this Debian issue`_).
 
 Now the nasty thing is that databases from 5.X are not compatible with 4.X.
 

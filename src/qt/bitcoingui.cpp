@@ -187,7 +187,7 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(receiveCoinsAction);
 
     sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send coins"), this);
-    sendCoinsAction->setToolTip(tr("Send coins to a bitcoin address"));
+    sendCoinsAction->setToolTip(tr("Send coins to a litecoin address"));
     sendCoinsAction->setCheckable(true);
     tabGroup->addAction(sendCoinsAction);
 
@@ -200,11 +200,11 @@ void BitcoinGUI::createActions()
     quitAction = new QAction(QIcon(":/icons/quit"), tr("&Exit"), this);
     quitAction->setToolTip(tr("Quit application"));
     aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About"), this);
-    aboutAction->setToolTip(tr("Show information about Bitcoin"));
+    aboutAction->setToolTip(tr("Show information about Litecoin"));
     optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
-    optionsAction->setToolTip(tr("Modify configuration options for bitcoin"));
-    openBitcoinAction = new QAction(QIcon(":/icons/bitcoin"), tr("Open &Bitcoin"), this);
-    openBitcoinAction->setToolTip(tr("Show the Bitcoin window"));
+    optionsAction->setToolTip(tr("Modify configuration options for Litecoin"));
+    openBitcoinAction = new QAction(QIcon(":/icons/bitcoin"), tr("Open &Litecoin"), this);
+    openBitcoinAction->setToolTip(tr("Show the Litecoin window"));
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the current view to a file"));
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet"), this);
@@ -284,20 +284,20 @@ void BitcoinGUI::createTrayIcon()
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setToolTip("Bitcoin client");
+    trayIcon->setToolTip("Litecoin client");
     trayIcon->setIcon(QIcon(":/icons/toolbar"));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
     trayIcon->show();
 
-    notificator = new Notificator(tr("bitcoin-qt"), trayIcon);
+    notificator = new Notificator(tr("litecoin-qt"), trayIcon);
 }
 
 void BitcoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger)
     {
-        // Click on system tray icon triggers "open bitcoin"
+        // Click on system tray icon triggers "open litecoin"
         openBitcoinAction->trigger();
     }
 
@@ -329,7 +329,7 @@ void BitcoinGUI::setNumConnections(int count)
     default: icon = ":/icons/connect_4"; break;
     }
     labelConnectionsIcon->setPixmap(QIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Bitcoin network", "", count));
+    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Litecoin network", "", count));
 }
 
 void BitcoinGUI::setNumBlocks(int count)

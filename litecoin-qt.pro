@@ -104,7 +104,8 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/qvaluecombobox.h \
     src/qt/askpassphrasedialog.h \
     src/protocol.h \
-    src/qt/notificator.h
+    src/qt/notificator.h \
+    src/scrypt.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -149,7 +150,8 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/qvaluecombobox.cpp \
     src/qt/askpassphrasedialog.cpp \
     src/protocol.cpp \
-    src/qt/notificator.cpp
+    src/qt/notificator.cpp \
+    src/scrypt.c
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -216,7 +218,7 @@ windows:RC_FILE = src/qt/res/bitcoin-qt.rc
 
 macx:DEFINES += __WXMAC_OSX__ MSG_NOSIGNAL=0 BOOST_FILESYSTEM_VERSION=3
 macx:ICON = src/qt/res/icons/bitcoin.icns
-macx:TARGET = "Bitcoin Qt"
+macx:TARGET = "Litecoin Qt"
 
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH

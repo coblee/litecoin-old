@@ -53,7 +53,7 @@ void Shutdown(void* parg)
         delete pwalletMain;
         CreateThread(ExitTimeout, NULL);
         Sleep(50);
-        printf("Bitcoin exiting\n\n");
+        printf("Litecoin exiting\n\n");
         fExit = true;
         exit(0);
     }
@@ -160,15 +160,15 @@ bool AppInit2(int argc, char* argv[])
     if (mapArgs.count("-?") || mapArgs.count("--help"))
     {
         string strUsage = string() +
-          _("Bitcoin version") + " " + FormatFullVersion() + "\n\n" +
+          _("Litecoin version") + " " + FormatFullVersion() + "\n\n" +
           _("Usage:") + "\t\t\t\t\t\t\t\t\t\t\n" +
-            "  bitcoin [options]                   \t  " + "\n" +
-            "  bitcoin [options] <command> [params]\t  " + _("Send command to -server or bitcoind\n") +
-            "  bitcoin [options] help              \t\t  " + _("List commands\n") +
-            "  bitcoin [options] help <command>    \t\t  " + _("Get help for a command\n") +
+            "  litecoin [options]                   \t  " + "\n" +
+            "  litecoin [options] <command> [params]\t  " + _("Send command to -server or litecoind\n") +
+            "  litecoin [options] help              \t\t  " + _("List commands\n") +
+            "  litecoin [options] help <command>    \t\t  " + _("Get help for a command\n") +
           _("Options:\n") +
-            "  -conf=<file>     \t\t  " + _("Specify configuration file (default: bitcoin.conf)\n") +
-            "  -pid=<file>      \t\t  " + _("Specify pid file (default: bitcoind.pid)\n") +
+            "  -conf=<file>     \t\t  " + _("Specify configuration file (default: litecoin.conf)\n") +
+            "  -pid=<file>      \t\t  " + _("Specify pid file (default: litecoin.pid)\n") +
             "  -gen             \t\t  " + _("Generate coins\n") +
             "  -gen=0           \t\t  " + _("Don't generate coins\n") +
             "  -min             \t\t  " + _("Start minimized\n") +
@@ -198,7 +198,7 @@ bool AppInit2(int argc, char* argv[])
             "  -testnet         \t\t  " + _("Use the test network\n") +
             "  -rpcuser=<user>  \t  "   + _("Username for JSON-RPC connections\n") +
             "  -rpcpassword=<pw>\t  "   + _("Password for JSON-RPC connections\n") +
-            "  -rpcport=<port>  \t\t  " + _("Listen for JSON-RPC connections on <port> (default: 8332)\n") +
+            "  -rpcport=<port>  \t\t  " + _("Listen for JSON-RPC connections on <port> (default: 9332)\n") +
             "  -rpcallowip=<ip> \t\t  " + _("Allow JSON-RPC connections from specified IP address\n") +
             "  -rpcconnect=<ip> \t  "   + _("Send commands to node running on <ip> (default: 127.0.0.1)\n") +
             "  -keypool=<n>     \t  "   + _("Set key pool size to <n> (default: 100)\n") +
@@ -206,7 +206,7 @@ bool AppInit2(int argc, char* argv[])
 
 #ifdef USE_SSL
         strUsage += string() +
-            _("\nSSL options: (see the Bitcoin Wiki for SSL setup instructions)\n") +
+            _("\nSSL options: (see the Litecoin Wiki for SSL setup instructions)\n") +
             "  -rpcssl                                \t  " + _("Use OpenSSL (https) for JSON-RPC connections\n") +
             "  -rpcsslcertificatechainfile=<file.cert>\t  " + _("Server certificate file (default: server.cert)\n") +
             "  -rpcsslprivatekeyfile=<file.pem>       \t  " + _("Server private key (default: server.pem)\n") +
@@ -285,7 +285,7 @@ bool AppInit2(int argc, char* argv[])
     if (!fDebug && !pszSetDataDir[0])
         ShrinkDebugFile();
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    printf("Bitcoin version %s\n", FormatFullVersion().c_str());
+    printf("Litecoin version %s\n", FormatFullVersion().c_str());
     printf("Default data directory %s\n", GetDefaultDataDir().c_str());
 
     if (GetBoolArg("-loadblockindextest"))
@@ -296,14 +296,14 @@ bool AppInit2(int argc, char* argv[])
         return false;
     }
 
-    // Make sure only a single bitcoin process is using the data directory.
+    // Make sure only a single litecoin process is using the data directory.
     string strLockFile = GetDataDir() + "/.lock";
     FILE* file = fopen(strLockFile.c_str(), "a"); // empty lock file; created if it doesn't exist.
     if (file) fclose(file);
     static boost::interprocess::file_lock lock(strLockFile.c_str());
     if (!lock.try_lock())
     {
-        wxMessageBox(strprintf(_("Cannot obtain a lock on data directory %s.  Bitcoin is probably already running."), GetDataDir().c_str()), "Bitcoin");
+        wxMessageBox(strprintf(_("Cannot obtain a lock on data directory %s.  Litecoin is probably already running."), GetDataDir().c_str()), "Litecoin");
         return false;
     }
 
@@ -313,7 +313,7 @@ bool AppInit2(int argc, char* argv[])
     {
         if (!BindListenPort(strErrors))
         {
-            wxMessageBox(strErrors, "Bitcoin");
+            wxMessageBox(strErrors, "Litecoin");
             return false;
         }
     }
@@ -322,7 +322,7 @@ bool AppInit2(int argc, char* argv[])
     // Load data files
     //
     if (fDaemon)
-        fprintf(stdout, "bitcoin server starting\n");
+        fprintf(stdout, "litecoin server starting\n");
     strErrors = "";
     int64 nStart;
 
@@ -351,7 +351,7 @@ bool AppInit2(int argc, char* argv[])
         if (nLoadWalletRet == DB_CORRUPT)
             strErrors += _("Error loading wallet.dat: Wallet corrupted      \n");
         else if (nLoadWalletRet == DB_TOO_NEW)
-            strErrors += _("Error loading wallet.dat: Wallet requires newer version of Bitcoin      \n");
+            strErrors += _("Error loading wallet.dat: Wallet requires newer version of Litecoin      \n");
         else
             strErrors += _("Error loading wallet.dat      \n");
     }
@@ -390,7 +390,7 @@ bool AppInit2(int argc, char* argv[])
 
     if (!strErrors.empty())
     {
-        wxMessageBox(strErrors, "Bitcoin", wxOK | wxICON_ERROR);
+        wxMessageBox(strErrors, "Litecoin", wxOK | wxICON_ERROR);
         return false;
     }
 
@@ -444,7 +444,7 @@ bool AppInit2(int argc, char* argv[])
         addrProxy = CAddress(mapArgs["-proxy"]);
         if (!addrProxy.IsValid())
         {
-            wxMessageBox(_("Invalid -proxy address"), "Bitcoin");
+            wxMessageBox(_("Invalid -proxy address"), "Litecoin");
             return false;
         }
     }
@@ -469,11 +469,11 @@ bool AppInit2(int argc, char* argv[])
     {
         if (!ParseMoney(mapArgs["-paytxfee"], nTransactionFee))
         {
-            wxMessageBox(_("Invalid amount for -paytxfee=<amount>"), "Bitcoin");
+            wxMessageBox(_("Invalid amount for -paytxfee=<amount>"), "Litecoin");
             return false;
         }
         if (nTransactionFee > 0.25 * COIN)
-            wxMessageBox(_("Warning: -paytxfee is set very high.  This is the transaction fee you will pay if you send a transaction."), "Bitcoin", wxOK | wxICON_EXCLAMATION);
+            wxMessageBox(_("Warning: -paytxfee is set very high.  This is the transaction fee you will pay if you send a transaction."), "Litecoin", wxOK | wxICON_EXCLAMATION);
     }
 
     if (fHaveUPnP)
@@ -496,7 +496,7 @@ bool AppInit2(int argc, char* argv[])
     RandAddSeedPerfmon();
 
     if (!CreateThread(StartNode, NULL))
-        wxMessageBox(_("Error: CreateThread(StartNode) failed"), "Bitcoin");
+        wxMessageBox(_("Error: CreateThread(StartNode) failed"), "Litecoin");
 
     if (fServer)
         CreateThread(ThreadRPCServer, NULL);

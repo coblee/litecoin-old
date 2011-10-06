@@ -1,4 +1,5 @@
 Copyright (c) 2009-2011 Bitcoin Developers
+Copyright (c) 2011 Litecoin Developers
 Distributed under the MIT/X11 software license, see the accompanying
 file license.txt or http://www.opensource.org/licenses/mit-license.php.
 This product includes software developed by the OpenSSL Project for use in
@@ -7,7 +8,7 @@ cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP
 software written by Thomas Bernard.
 
 
-See readme-qt.rst for instructions on building Bitcoin QT, the
+See readme-qt.rst for instructions on building Litecoin QT, the
 graphical user interface.
 
 WINDOWS BUILD NOTES
@@ -22,7 +23,7 @@ MSYS 1.0.11 was also used (sh needed to compile some dependencies)
 
 Candidate releases were built with MSVC 10.0 (2010), but
 compiling with Visual C++ caused rendering artifacts when
-bitcoin was run.
+litecoin was run.
 
 
 Dependencies
@@ -82,9 +83,9 @@ make -f Makefile.mingw
 mkdir miniupnpc
 cp *.h miniupnpc/
 
-Bitcoin
+Litecoin
 -------
 DOS prompt:
-cd \bitcoin\src
-mingw32-make bitcoind.exe -f makefile.mingw
-strip bitcoind.exe
+cd \litecoin\src
+mingw32-make litecoind.exe -f makefile.mingw
+strip litecoind.exe
