@@ -76,6 +76,7 @@ OBJS= \
     obj\rpc.o \
     obj\protocol.o \
     obj\script.o \
+    obj\scrypt.o \
     obj\util.o \
     obj\wallet.o
 
@@ -91,6 +92,8 @@ all: litecoind.exe
 obj\util.obj: $(HEADERS)
 
 obj\script.obj: $(HEADERS)
+
+obj\scrypt.obj: $(HEADERS)
 
 obj\db.obj: $(HEADERS)
 
@@ -120,6 +123,8 @@ obj\uibase.obj: $(HEADERS)
 obj\nogui\util.obj: $(HEADERS)
 
 obj\nogui\script.obj: $(HEADERS)
+
+obj\nogui\scrypt.obj: $(HEADERS)
 
 obj\nogui\db.obj: $(HEADERS)
 

@@ -49,6 +49,7 @@ HEADERS = \
     protocol.h \
     bitcoinrpc.h \
     script.h \
+    scrypt.h \
     serialize.h \
     strlcpy.h \
     uint256.h \
@@ -66,6 +67,7 @@ OBJS= \
     obj/protocol.o \
     obj/bitcoinrpc.o \
     obj/script.o \
+    obj/scrypt.o \
     obj/util.o \
     obj/wallet.o
 
