@@ -42,6 +42,7 @@ HEADERS = \
     protocol.h \
     bitcoinrpc.h \
     script.h \
+    scrypt.h \
     serialize.h \
     strlcpy.h \
     uint256.h \
