@@ -1463,7 +1463,7 @@ bool LoadBlockIndex(bool fAllowNew)
 {
     if (fTestNet)
     {
-        hashGenesisBlock = uint256("0x00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008");
+        hashGenesisBlock = uint256("0x6eda1ed4b586d7edd198150ed7cf2bb2a90a07ff2f96fd038713737b44269161");
         // bnProofOfWorkLimit = CBigNum(~uint256(0) >> 28); // Litecoin: starting difficulty is the same for testnet
         // Litecoin: increase each by adding 2 to bitcoin's value.
         pchMessageStart[0] = 0xfc;
@@ -1496,7 +1496,7 @@ bool LoadBlockIndex(bool fAllowNew)
         //   vMerkleTree: f1b0e87638
 
         // Genesis block
-        const char* pszTimestamp = "The Times 05/Oct/2011 Steve Jobs, Apple’s Visionary, Dies at 56";
+        const char* pszTimestamp = "NY Times 05/Oct/2011 Steve Jobs, Apple’s Visionary, Dies at 56";
         CTransaction txNew;
         txNew.vin.resize(1);
         txNew.vout.resize(1);
@@ -1508,22 +1508,22 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1231006505;
-        block.nBits    = 0x1d00ffff;
+        block.nTime    = 1317798646;
+        block.nBits    = 0x1e0ffff0;
         block.nNonce   = 2083236893;
 
         if (fTestNet)
         {
-            block.nTime    = 1296688602;
-            block.nBits    = 0x1d07fff8;
-            block.nNonce   = 384568319;
+            block.nTime    = 1317798646;
+            block.nBits    = 0x1e7fff80;
+            block.nNonce   = 384706145;
         }
 
         //// debug print
         printf("%s\n", block.GetHash().ToString().c_str());
         printf("%s\n", hashGenesisBlock.ToString().c_str());
         printf("%s\n", block.hashMerkleRoot.ToString().c_str());
-        assert(block.hashMerkleRoot == uint256("0xf1b0e87638f6648ded8f237effbc8d6565d5972fa35d6e84225a463ad7e01086"));
+        assert(block.hashMerkleRoot == uint256("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
 
         // If genesis block hash does not match, then generate new genesis hash.
         if (CREATE_GENESIS && block.GetHash() != hashGenesisBlock)
@@ -1542,7 +1542,7 @@ bool LoadBlockIndex(bool fAllowNew)
                     break;
                 if ((block.nNonce & 0xFFF) == 0)
                 {
-                    printf("nonce %08X\n", block.nNonce);
+                    printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
                 }
                 ++block.nNonce;
                 if (block.nNonce == 0)
