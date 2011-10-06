@@ -83,6 +83,9 @@ all: litecoind
 -include obj/nogui/*.P
 -include obj/test/*.P
 
+obj/nogui/scrypt.o: scrypt.c
+	gcc -c -o $@ $^
+
 obj/nogui/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \

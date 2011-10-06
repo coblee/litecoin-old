@@ -124,7 +124,7 @@ obj\nogui\util.obj: $(HEADERS)
 
 obj\nogui\script.obj: $(HEADERS)
 
-obj\nogui\scrypt.obj: $(HEADERS)
+obj\nogui\scrypt.obj: scrypt.c gcc -c -o $@ $^
 
 obj\nogui\db.obj: $(HEADERS)
 

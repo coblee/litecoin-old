@@ -78,6 +78,9 @@ OBJS= \
 
 all: litecoind.exe
 
+obj/nogui/scrypt.o: scrypt.c
+	gcc -c -o $@ $^
+
 obj/nogui/%.o: %.cpp $(HEADERS)
 	i586-mingw32msvc-g++ -c $(CFLAGS) -o $@ $<
 
