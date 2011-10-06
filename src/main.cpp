@@ -649,9 +649,9 @@ int64 static GetBlockValue(int nHeight, int64 nFees)
 
 unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast)
 {
-    const int64 nTargetTimespan = 21 * 60 * 60; // Litecoin: 21 hours
+    const int64 nTargetTimespan = 3.5 * 24 * 60 * 60; // Litecoin: 3.5 days for diff retarget
     const int64 nTargetSpacing = 2.5 * 60; // Litecoin: 2.5 minutes between blocks
-    const int64 nInterval = nTargetTimespan / nTargetSpacing; // Litecoin: 504 blocks
+    const int64 nInterval = nTargetTimespan / nTargetSpacing; // Litecoin: 2016 blocks
 
     // Genesis block
     if (pindexLast == NULL)
