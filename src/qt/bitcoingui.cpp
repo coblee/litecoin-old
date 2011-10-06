@@ -56,7 +56,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     notificator(0)
 {
     resize(850, 550);
-    setWindowTitle(tr("Bitcoin Wallet"));
+    setWindowTitle(tr("Litecoin Wallet"));
     setWindowIcon(QIcon(":icons/bitcoin"));
     // Accept D&D of URIs
     setAcceptDrops(true);

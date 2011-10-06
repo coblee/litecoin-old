@@ -188,7 +188,12 @@ PRE_TARGETDEPS += compiler_TSQM_make_all
 
 # "Other files" to show in Qt Creator
 OTHER_FILES += \
-    doc/*.rst doc/*.txt doc/README README.md
+    doc/*.rst doc/*.txt doc/README README.md \
+    src/makefile.vc \
+    src/makefile.unix \
+    src/makefile.osx \
+    src/makefile.mingw \
+    src/makefile.linux-mingw
 
 # platform specific defaults, if not overridden on command line
 isEmpty(BOOST_LIB_SUFFIX) {
@@ -227,3 +232,4 @@ LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
 LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_LIB_SUFFIX
 
 system($$QMAKE_LRELEASE -silent $$_PRO_FILE_)
+
