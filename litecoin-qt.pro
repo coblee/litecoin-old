@@ -188,12 +188,7 @@ PRE_TARGETDEPS += compiler_TSQM_make_all
 
 # "Other files" to show in Qt Creator
 OTHER_FILES += \
-    doc/*.rst doc/*.txt doc/README README.md \
-    src/makefile.vc \
-    src/makefile.unix \
-    src/makefile.osx \
-    src/makefile.mingw \
-    src/makefile.linux-mingw
+    doc/*.rst doc/*.txt doc/README README.md
 
 # platform specific defaults, if not overridden on command line
 isEmpty(BOOST_LIB_SUFFIX) {

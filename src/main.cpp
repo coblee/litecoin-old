@@ -1463,7 +1463,7 @@ bool LoadBlockIndex(bool fAllowNew)
 {
     if (fTestNet)
     {
-        hashGenesisBlock = uint256("0x6eda1ed4b586d7edd198150ed7cf2bb2a90a07ff2f96fd038713737b44269161");
+        hashGenesisBlock = uint256("0xf5ae71e26c74beacc88382716aced69cddf3dffff24f384e1808905e0188f68f");
         // bnProofOfWorkLimit = CBigNum(~uint256(0) >> 28); // Litecoin: starting difficulty is the same for testnet
         // Litecoin: increase each by adding 2 to bitcoin's value.
         pchMessageStart[0] = 0xfc;
@@ -1515,8 +1515,8 @@ bool LoadBlockIndex(bool fAllowNew)
         if (fTestNet)
         {
             block.nTime    = 1317798646;
-            block.nBits    = 0x1e7fff80;
-            block.nNonce   = 384706145;
+            block.nBits    = 0x1e0ffff0;
+            block.nNonce   = 385270584;
         }
 
         //// debug print
