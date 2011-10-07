@@ -28,11 +28,12 @@ LIBS= -dead_strip \
  -lssl \
  -lcrypto
 
-DEFS=-DMSG_NOSIGNAL=0 -DUSE_SSL
+DEFS=-DMSG_NOSIGNAL=0 -DUSE_SSL -D__WXMAC_OSX__
 
 DEBUGFLAGS=-g
 # ppc doesn't work because we don't support big-endian
-CFLAGS=-mmacosx-version-min=10.5 -arch i386 -O3 -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
+#CFLAGS=-mmacosx-version-min=10.5 -arch i386 -O3 -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
+CFLAGS=-mmacosx-version-min=10.5 -arch x86_64 -O3 -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
 HEADERS = \
     base58.h \
     bignum.h \
