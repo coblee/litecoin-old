@@ -45,7 +45,6 @@ static const int fHaveUPnP = true;
 #else
 static const int fHaveUPnP = false;
 #endif
-static const bool CREATE_GENESIS = false;
 
 
 

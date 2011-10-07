@@ -27,7 +27,7 @@ unsigned int nTransactionsUpdated = 0;
 map<COutPoint, CInPoint> mapNextTx;
 
 map<uint256, CBlockIndex*> mapBlockIndex;
-uint256 hashGenesisBlock("0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+uint256 hashGenesisBlock("0x12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2");
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // Litecoin: starting difficulty is 1 / 2^12
 const int nTotalBlocksEstimate = 140700; // Conservative estimate of total nr of blocks on main chain
 const int nInitialBlockThreshold = 120; // Regard blocks up until N-threshold as "initial download"
@@ -1489,11 +1489,11 @@ bool LoadBlockIndex(bool fAllowNew)
             return false;
 
         // Genesis Block:
-        // CBlock(hash=ddda629436f10cf1c31c, PoW=ad4388431a59452eedf3, ver=1, hashPrevBlock=00000000000000000000, hashMerkleRoot=f1b0e87638, nTime=1296688602, nBits=1d07fff8, nNonce=384568319, vtx=1)
-        //   CTransaction(hash=f1b0e87638, ver=1, vin.size=1, vout.size=1, nLockTime=0)
-        //     CTxIn(COutPoint(0000000000, -1), coinbase 04ffff001d0104415468652054696d65732030352f4f63742f32303131205374657665204a6f62732c204170706c65e280997320566973696f6e6172792c2044696573206174203536)
+        // CBlock(hash=12a765e31ffd4059bada, PoW=0000050c34a64b415b6b, ver=1, hashPrevBlock=00000000000000000000, hashMerkleRoot=97ddfbbae6, nTime=0, nBits=1e0ffff0, nNonce=0, vtx=1)
+        //   CTransaction(hash=97ddfbbae6, ver=1, vin.size=1, vout.size=1, nLockTime=0)
+        //     CTxIn(COutPoint(0000000000, -1), coinbase 04ffff001d0104404e592054696d65732030352f4f63742f32303131205374657665204a6f62732c204170706c65e280997320566973696f6e6172792c2044696573206174203536)
         //     CTxOut(nValue=50.00000000, scriptPubKey=040184710fa689ad5023690c80f3a4)
-        //   vMerkleTree: f1b0e87638
+        //   vMerkleTree: 97ddfbbae6
 
         // Genesis block
         const char* pszTimestamp = "NY Times 05/Oct/2011 Steve Jobs, Apple’s Visionary, Dies at 56";
@@ -1508,9 +1508,25 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1317798646;
+        block.nTime    = 0;
         block.nBits    = 0x1e0ffff0;
-        block.nNonce   = 2083236893;
+        block.nNonce   = 0;
+
+        // Litecoin: add ability to start off mainnet with a config change
+        if (mapArgs.count("-block_nTime"))
+        {
+             stringstream convert(mapArgs["-block_nTime"]);
+             if ( !(convert >> block.nTime))
+                 block.nTime = 0;
+             printf("block.nTime custom configured by -block_nTime in litecoin.conf \n");
+        }
+        if (mapArgs.count("-block_nNonce"))
+        {
+            stringstream convert(mapArgs["-block_nNonce"]);
+            if ( !(convert >> block.nNonce))
+                block.nNonce = 0;
+            printf("block.nNonce custom configured by -block_nNonce in litecoin.conf \n");
+        }
 
         if (fTestNet)
         {
@@ -1526,7 +1542,7 @@ bool LoadBlockIndex(bool fAllowNew)
         assert(block.hashMerkleRoot == uint256("0x97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9"));
 
         // If genesis block hash does not match, then generate new genesis hash.
-        if (CREATE_GENESIS && block.GetHash() != hashGenesisBlock)
+        if (false && block.GetHash() != hashGenesisBlock)
         {
             printf("Searching for genesis block...\n");
             // This will figure out a valid hash and Nonce if you're
