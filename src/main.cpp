@@ -1567,7 +1567,8 @@ bool LoadBlockIndex(bool fAllowNew)
         }
 
         block.print();
-        assert(block.GetHash() == hashGenesisBlock);
+        if (block.GetHash() != hashGenesisBlock)
+            assert(!"Litecoin is only available on testnet right now. Please add testnet=1 to your litecoin.conf file.");
 
         // Start new block file
         unsigned int nFile;
