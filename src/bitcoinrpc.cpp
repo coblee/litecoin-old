@@ -226,6 +226,27 @@ double GetDifficulty()
     return dDiff;
 }
 
+// Litecoin: Return average network hashes per second based on last number of blocks.
+int GetNetworkHashPS() {
+    if (pindexBest == NULL)
+        return 0;
+
+    // Use the last 120 blocks.
+    int lookup = 120;
+
+    if (pindexBest->nHeight <= lookup)
+        return 0;
+
+    CBlockIndex* pindexPrev = pindexBest;
+    for (int i = 0; i < lookup; i++)
+        pindexPrev = pindexPrev->pprev;
+
+    int64 timeDiff = pindexBest->GetBlockTime() - pindexPrev->GetBlockTime();
+    int64 timePerBlock = timeDiff / lookup;
+
+    return GetDifficulty() * pow(2.0, 32) / timePerBlock;
+}
+
 Value getdifficulty(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -306,6 +327,7 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("genproclimit",  (int)(fLimitProcessors ? nLimitProcessors : -1)));
     obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
     obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
+    obj.push_back(Pair("networkhashps", (int)GetNetworkHashPS()));
     obj.push_back(Pair("testnet",       fTestNet));
     obj.push_back(Pair("keypoololdest", (boost::int64_t)pwalletMain->GetOldestKeyPoolTime()));
     obj.push_back(Pair("keypoolsize",   pwalletMain->GetKeyPoolSize()));
