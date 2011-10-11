@@ -2049,7 +2049,7 @@ bool HTTPAuthorized(map<string, string>& mapHeaders)
         return false;
     string strUser = strUserPass.substr(0, nColon);
     string strPassword = strUserPass.substr(nColon+1);
-    return (strUser == mapArgs["-rpcuser"] && strPassword == mapArgs["-rpcpassword"]);
+    return (strUser == strRPCUser && strPassword == strRPCPass);
 }
 
 //
@@ -2182,7 +2182,7 @@ void ThreadRPCServer2(void* parg)
 {
     printf("ThreadRPCServer started\n");
 
-    if (mapArgs["-rpcuser"] == "" && mapArgs["-rpcpassword"] == "")
+    if (strRPCUser == "" && strRPCPass == "")
     {
         string strWhatAmI = "To use litecoind";
         if (mapArgs.count("-server"))
@@ -2364,7 +2364,7 @@ void ThreadRPCServer2(void* parg)
 
 Object CallRPC(const string& strMethod, const Array& params)
 {
-    if (mapArgs["-rpcuser"] == "" && mapArgs["-rpcpassword"] == "")
+    if (strRPCUser == "" && strRPCPass == "")
         throw runtime_error(strprintf(
             _("You must set rpcpassword=<password> in the configuration file:\n%s\n"
               "If the file does not exist, create it with owner-readable-only file permissions."),
@@ -2392,7 +2392,7 @@ Object CallRPC(const string& strMethod, const Array& params)
 
 
     // HTTP basic authentication
-    string strUserPass64 = EncodeBase64(mapArgs["-rpcuser"] + ":" + mapArgs["-rpcpassword"]);
+    string strUserPass64 = EncodeBase64(strRPCUser + ":" + strRPCPass);
     map<string, string> mapRequestHeaders;
     mapRequestHeaders["Authorization"] = string("Basic ") + strUserPass64;
 
