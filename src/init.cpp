@@ -236,6 +236,9 @@ bool AppInit2(int argc, char* argv[])
     else
         fServer = GetBoolArg("-server");
 
+        strRPCUser = mapArgs["-rpcuser"];
+        strRPCPass = mapArgs["-rpcpassword"];
+        
     /* force fServer when running without GUI */
 #if !defined(QT_GUI)
     fServer = true;
