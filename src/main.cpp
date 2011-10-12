@@ -1312,12 +1312,11 @@ bool CBlock::AcceptBlock()
 
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!fTestNet)
-        if (nHeight == 1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f"))
+        if ((nHeight == 1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f")) ||
+            (nHeight == 2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")))
             return DoS(100, error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight));
 
-    // Only allow testnet chain to reach 10k blocks.
-    if (fTestNet && nHeight == 10000)
-            return DoS(100, error("AcceptBlock() : rejected as testnet cannot grow larger than %d blocks", nHeight));
+    printf("Got new block at height %d: %s\n", nHeight, hash.ToString().c_str());
 
     // Write block to history file
     if (!CheckDiskSpace(::GetSerializeSize(*this, SER_DISK)))
@@ -1489,7 +1488,7 @@ bool LoadBlockIndex(bool fAllowNew)
             return false;
 
         // Genesis Block:
-        // CBlock(hash=12a765e31ffd4059bada, PoW=0000050c34a64b415b6b, ver=1, hashPrevBlock=00000000000000000000, hashMerkleRoot=97ddfbbae6, nTime=0, nBits=1e0ffff0, nNonce=0, vtx=1)
+        // CBlock(hash=12a765e31ffd4059bada, PoW=0000050c34a64b415b6b, ver=1, hashPrevBlock=00000000000000000000, hashMerkleRoot=97ddfbbae6, nTime=1317972665, nBits=1e0ffff0, nNonce=2084524493, vtx=1)
         //   CTransaction(hash=97ddfbbae6, ver=1, vin.size=1, vout.size=1, nLockTime=0)
         //     CTxIn(COutPoint(0000000000, -1), coinbase 04ffff001d0104404e592054696d65732030352f4f63742f32303131205374657665204a6f62732c204170706c65e280997320566973696f6e6172792c2044696573206174203536)
         //     CTxOut(nValue=50.00000000, scriptPubKey=040184710fa689ad5023690c80f3a4)
@@ -1508,25 +1507,9 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 0;
+        block.nTime    = 1317972665;
         block.nBits    = 0x1e0ffff0;
-        block.nNonce   = 0;
-
-        // Litecoin: add ability to start off mainnet with a config change
-        if (mapArgs.count("-block_nTime"))
-        {
-             stringstream convert(mapArgs["-block_nTime"]);
-             if ( !(convert >> block.nTime))
-                 block.nTime = 0;
-             printf("block.nTime custom configured by -block_nTime in litecoin.conf \n");
-        }
-        if (mapArgs.count("-block_nNonce"))
-        {
-            stringstream convert(mapArgs["-block_nNonce"]);
-            if ( !(convert >> block.nNonce))
-                block.nNonce = 0;
-            printf("block.nNonce custom configured by -block_nNonce in litecoin.conf \n");
-        }
+        block.nNonce   = 2084524493;
 
         if (fTestNet)
         {
@@ -1573,8 +1556,7 @@ bool LoadBlockIndex(bool fAllowNew)
         }
 
         block.print();
-        if (block.GetHash() != hashGenesisBlock)
-            assert(!"Litecoin is only available on testnet right now. Please add testnet=1 to your litecoin.conf file.");
+        assert(block.GetHash() == hashGenesisBlock);
 
         // Start new block file
         unsigned int nFile;

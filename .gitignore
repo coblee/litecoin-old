@@ -12,10 +12,12 @@ src/litecoind
 #compilation and Qt preprocessor part
 *.qm
 Makefile
-bitcoin-qt
+build
+Info.plist
 #resources cpp
 qrc_*.cpp
 #qt creator
 *.pro.user
 #mac specific
+Litecoin Qt.*
 .DS_Store
