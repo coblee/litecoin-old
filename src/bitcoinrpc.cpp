@@ -241,10 +241,10 @@ int GetNetworkHashPS() {
     for (int i = 0; i < lookup; i++)
         pindexPrev = pindexPrev->pprev;
 
-    int64 timeDiff = pindexBest->GetBlockTime() - pindexPrev->GetBlockTime();
-    int64 timePerBlock = timeDiff / lookup;
+    double timeDiff = pindexBest->GetBlockTime() - pindexPrev->GetBlockTime();
+    double timePerBlock = timeDiff / lookup;
 
-    return GetDifficulty() * pow(2.0, 32) / timePerBlock;
+    return (int)(((double)GetDifficulty() * pow(2.0, 32)) / timePerBlock);
 }
 
 Value getdifficulty(const Array& params, bool fHelp)

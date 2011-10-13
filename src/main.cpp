@@ -29,7 +29,7 @@ map<COutPoint, CInPoint> mapNextTx;
 map<uint256, CBlockIndex*> mapBlockIndex;
 uint256 hashGenesisBlock("0x12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2");
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // Litecoin: starting difficulty is 1 / 2^12
-const int nTotalBlocksEstimate = 140700; // Conservative estimate of total nr of blocks on main chain
+const int nTotalBlocksEstimate = 1500; // Conservative estimate of total nr of blocks on main chain
 const int nInitialBlockThreshold = 120; // Regard blocks up until N-threshold as "initial download"
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
@@ -724,7 +724,7 @@ int GetTotalBlocksEstimate()
     }
     else
     {
-        return 0; // Litecoin: just started, so estimate is 0
+        return nTotalBlocksEstimate;
     }
 }
 
@@ -1312,9 +1312,9 @@ bool CBlock::AcceptBlock()
 
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!fTestNet)
-        if ((nHeight ==   1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f")) ||
-            (nHeight ==   2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")) ||
-            (nHeight == 120 && hash != uint256("0x7f182779dbf8a6e71c22a92a6fef868166a542e76c6080ec374017673148c3db")))
+        if ((nHeight ==    1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f")) ||
+            (nHeight ==    2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")) ||
+            (nHeight == 1500 && hash != uint256("0x841a2965955dd288cfa707a755d05a54e45f8bd476835ec9af4402a2b59a2967")))
             return DoS(100, error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight));
 
     printf("Got new block at height %d: %s\n", nHeight, hash.ToString().c_str());
