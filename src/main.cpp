@@ -1316,7 +1316,8 @@ bool CBlock::AcceptBlock()
             (nHeight ==    2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")) ||
             (nHeight == 1500 && hash != uint256("0x841a2965955dd288cfa707a755d05a54e45f8bd476835ec9af4402a2b59a2967")) ||
             (nHeight == 4032 && hash != uint256("0x9ce90e427198fc0ef05e5905ce3503725b80e26afd35a987965fd7e3d9cf0846")) ||
-            (nHeight == 6048 && hash != uint256("0x3dd6e620060cf9c21aa4702413147329da0d1d6479dcca71076f5ba8d5fe00be")))
+            (nHeight == 6048 && hash != uint256("0x3dd6e620060cf9c21aa4702413147329da0d1d6479dcca71076f5ba8d5fe00be")) ||
+            (nHeight == 8064 && hash != uint256("0xeb984353fc5190f210651f150c40b8a4bab9eeeff0b729fcb3987da694430d70")))
             return DoS(100, error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight));
 
     printf("Got new block at height %d: %s\n", nHeight, hash.ToString().c_str());
