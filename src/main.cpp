@@ -1312,12 +1312,13 @@ bool CBlock::AcceptBlock()
 
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!fTestNet)
-        if ((nHeight ==    1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f")) ||
-            (nHeight ==    2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")) ||
-            (nHeight == 1500 && hash != uint256("0x841a2965955dd288cfa707a755d05a54e45f8bd476835ec9af4402a2b59a2967")) ||
-            (nHeight == 4032 && hash != uint256("0x9ce90e427198fc0ef05e5905ce3503725b80e26afd35a987965fd7e3d9cf0846")) ||
-            (nHeight == 6048 && hash != uint256("0x3dd6e620060cf9c21aa4702413147329da0d1d6479dcca71076f5ba8d5fe00be")) ||
-            (nHeight == 8064 && hash != uint256("0xeb984353fc5190f210651f150c40b8a4bab9eeeff0b729fcb3987da694430d70")))
+        if ((nHeight ==     1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f")) ||
+            (nHeight ==     2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")) ||
+            (nHeight ==  1500 && hash != uint256("0x841a2965955dd288cfa707a755d05a54e45f8bd476835ec9af4402a2b59a2967")) ||
+            (nHeight ==  4032 && hash != uint256("0x9ce90e427198fc0ef05e5905ce3503725b80e26afd35a987965fd7e3d9cf0846")) ||
+            (nHeight ==  6048 && hash != uint256("0x3dd6e620060cf9c21aa4702413147329da0d1d6479dcca71076f5ba8d5fe00be")) ||
+            (nHeight ==  8064 && hash != uint256("0xeb984353fc5190f210651f150c40b8a4bab9eeeff0b729fcb3987da694430d70")) ||
+            (nHeight == 10080 && hash != uint256("0x2e1eaf34c79287fc8132f293aa78c5999966311766974d9ca529c4ecfdab3737")))
             return DoS(100, error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight));
 
     printf("Got new block at height %d: %s\n", nHeight, hash.ToString().c_str());
