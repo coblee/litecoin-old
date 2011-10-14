@@ -1249,7 +1249,7 @@ void DNSAddressSeed()
 
 unsigned int pnSeed[] =
 {
-    0x2EFDCB71, 0xCC1B3AD6,
+    0x2EFDCB71, 0xCC1B3AD6, 0xADA77149,
 };
 
 
