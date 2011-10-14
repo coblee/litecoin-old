@@ -258,6 +258,17 @@ Value getdifficulty(const Array& params, bool fHelp)
 }
 
 
+Value getnetworkhashps(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getnetworkhashps\n"
+            "Returns the estimated network hashes per second based on the last 120 blocks.");
+
+    return GetNetworkHashPS();
+}
+
+
 Value getgenerate(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -1831,6 +1842,7 @@ pair<string, rpcfn_type> pCallTable[] =
     make_pair("getblocknumber",         &getblocknumber),
     make_pair("getconnectioncount",     &getconnectioncount),
     make_pair("getdifficulty",          &getdifficulty),
+    make_pair("getnetworkhashps",       &getnetworkhashps),
     make_pair("getgenerate",            &getgenerate),
     make_pair("setgenerate",            &setgenerate),
     make_pair("gethashespersec",        &gethashespersec),
@@ -1876,6 +1888,7 @@ string pAllowInSafeMode[] =
     "getblocknumber",
     "getconnectioncount",
     "getdifficulty",
+    "getnetworkhashps",
     "getgenerate",
     "setgenerate",
     "gethashespersec",
