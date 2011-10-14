@@ -29,7 +29,7 @@ map<COutPoint, CInPoint> mapNextTx;
 map<uint256, CBlockIndex*> mapBlockIndex;
 uint256 hashGenesisBlock("0x12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2");
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // Litecoin: starting difficulty is 1 / 2^12
-const int nTotalBlocksEstimate = 1500; // Conservative estimate of total nr of blocks on main chain
+const int nTotalBlocksEstimate = 10080; // Conservative estimate of total nr of blocks on main chain
 const int nInitialBlockThreshold = 120; // Regard blocks up until N-threshold as "initial download"
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
