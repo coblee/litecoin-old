@@ -67,16 +67,16 @@ If using Boost 1.37, append -mt to the boost libraries in the makefile.
 Dependency Build Instructions: Gentoo
 -------------------------------------
 
-Note: If you just want to install bitcoind on Gentoo, you can add the Bitcoin
+Note: If you just want to install litecoind on Gentoo, you can add the Litecoin
       overlay and use your package manager:
-          layman -a bitcoin && emerge bitcoind
+          layman -a litecoin && emerge litecoind
 
 emerge -av1 --noreplace boost glib openssl sys-libs/db:4.8
 
 Take the following steps to build (no UPnP support):
  cd ${BITCOIN_DIR}/src
  make -f makefile.unix USE_UPNP= BDB_INCLUDE_PATH='/usr/include/db4.8'
- strip bitcoind
+ strip litecoind
 
 
 Notes
