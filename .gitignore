@@ -19,5 +19,5 @@ qrc_*.cpp
 #qt creator
 *.pro.user
 #mac specific
-Litecoin Qt.*
+Litecoin-Qt.*
 .DS_Store
