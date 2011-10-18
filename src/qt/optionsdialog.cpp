@@ -313,13 +313,13 @@ MiningOptionsPage::MiningOptionsPage(QWidget *parent):
 
     QHBoxLayout *proc_hbox = new QHBoxLayout();
     proc_hbox->addSpacing(18);
-    QLabel *limit_processors_label = new QLabel(tr("Limit &Processors: "));
+    QLabel *limit_processors_label = new QLabel(tr("Limit &Threads: "));
     proc_hbox->addWidget(limit_processors_label);
     limit_processors = new QLineEdit();
     limit_processors->setMaximumWidth(55);
     limit_processors->setEnabled(false);
     limit_processors->setValidator(new QIntValidator(-1, 256, this));
-    limit_processors->setToolTip(tr("Limit mining to this number of processors, -1 is unlimited"));
+    limit_processors->setToolTip(tr("Limit mining to this number of threads, -1 is unlimited"));
     limit_processors_label->setBuddy(limit_processors);
     proc_hbox->addWidget(limit_processors);
     proc_hbox->addStretch(1);

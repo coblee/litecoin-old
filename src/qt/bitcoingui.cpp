@@ -405,11 +405,16 @@ void BitcoinGUI::setNumBlocks(int count)
 
 void BitcoinGUI::setHashrate(int hashrate)
 {
-    labelMiningIcon->setPixmap(QIcon(":/icons/tx_mined").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     if (hashrate > 0)
+    {
+        labelMiningIcon->setPixmap(QIcon(":/icons/mining_active").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelMiningIcon->setToolTip(tr("Mining litecoins at %1 hahes per second").arg(hashrate));
+    }
     else
+    {
+        labelMiningIcon->setPixmap(QIcon(":/icons/mining_inactive").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelMiningIcon->setToolTip(tr("Not mining litecoins"));
+    }
 }
 
 void BitcoinGUI::error(const QString &title, const QString &message)
