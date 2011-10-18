@@ -28,6 +28,8 @@ public:
         Fee, // qint64
         DisplayUnit, // BitcoinUnits::Unit
         DisplayAddresses, // bool
+        MiningGenerate, // bool
+        MiningLimitProcessors, // int
         OptionIDRowCount
     };
 

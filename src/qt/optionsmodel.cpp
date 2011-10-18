@@ -46,6 +46,10 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return QVariant(nDisplayUnit);
         case DisplayAddresses:
             return QVariant(bDisplayAddresses);
+        case MiningGenerate:
+            return QVariant(fGenerateBitcoins);
+        case MiningLimitProcessors:
+            return QVariant(nLimitProcessors);
         default:
             return QVariant();
         }
@@ -126,6 +130,17 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case DisplayAddresses: {
             bDisplayAddresses = value.toBool();
             walletdb.WriteSetting("bDisplayAddresses", bDisplayAddresses);
+            }
+        case MiningGenerate: {
+            GenerateBitcoins(value.toFloat(), wallet);
+            }
+        case MiningLimitProcessors: {
+            int nGenProcLimit = value.toInt();
+            fLimitProcessors = (nGenProcLimit >= 0);
+            nLimitProcessors = fLimitProcessors ? nGenProcLimit : -1;
+            WriteSetting("fLimitProcessors", fLimitProcessors);
+            WriteSetting("nLimitProcessors", nLimitProcessors);
+            GenerateBitcoins(fGenerateBitcoins, wallet);
             }
         default:
             break;

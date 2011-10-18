@@ -24,6 +24,7 @@ public:
     int getNumConnections() const;
     int getNumBlocks() const;
     int getNumBlocksAtStartup();
+    int getHashrate() const;
 
     QDateTime getLastBlockDate() const;
 
@@ -41,12 +42,14 @@ private:
 
     int cachedNumConnections;
     int cachedNumBlocks;
+    int cachedHashrate;
 
     int numBlocksAtStartup;
 
 signals:
     void numConnectionsChanged(int count);
     void numBlocksChanged(int count);
+    void hashrateChanged(int count);
 
     // Asynchronous error notification
     void error(const QString &title, const QString &message);

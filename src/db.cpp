@@ -804,9 +804,7 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
                 ssKey >> strKey;
 
                 // Options
-#ifndef QT_GUI
                 if (strKey == "fGenerateBitcoins")  ssValue >> fGenerateBitcoins;
-#endif
                 if (strKey == "nTransactionFee")    ssValue >> nTransactionFee;
                 if (strKey == "fLimitProcessors")   ssValue >> fLimitProcessors;
                 if (strKey == "nLimitProcessors")   ssValue >> nLimitProcessors;

@@ -11,7 +11,7 @@
 
 ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     QObject(parent), optionsModel(optionsModel),
-    cachedNumConnections(0), cachedNumBlocks(0)
+    cachedNumConnections(0), cachedNumBlocks(0), cachedHashrate(0)
 {
     // Until signal notifications is built into the bitcoin core,
     //  simply update everything after polling using a timer.
@@ -38,6 +38,13 @@ int ClientModel::getNumBlocksAtStartup()
     return numBlocksAtStartup;
 }
 
+int ClientModel::getHashrate() const
+{
+    if (GetTimeMillis() - nHPSTimerStart > 8000)
+        return (boost::int64_t)0;
+    return (boost::int64_t)dHashesPerSec;
+}
+
 QDateTime ClientModel::getLastBlockDate() const
 {
     return QDateTime::fromTime_t(pindexBest->GetBlockTime());
@@ -47,14 +54,18 @@ void ClientModel::update()
 {
     int newNumConnections = getNumConnections();
     int newNumBlocks = getNumBlocks();
+    int newHashrate = getHashrate();
 
     if(cachedNumConnections != newNumConnections)
         emit numConnectionsChanged(newNumConnections);
     if(cachedNumBlocks != newNumBlocks)
         emit numBlocksChanged(newNumBlocks);
+    if(cachedHashrate != newHashrate)
+        emit hashrateChanged(newHashrate);
 
     cachedNumConnections = newNumConnections;
     cachedNumBlocks = newNumBlocks;
+    cachedHashrate = newHashrate;
 }
 
 bool ClientModel::isTestNet() const

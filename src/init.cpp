@@ -436,7 +436,12 @@ bool AppInit2(int argc, char* argv[])
         return false;
     }
 
-    fGenerateBitcoins = GetBoolArg("-gen");
+    // Litecoin: Only force generate if -gen is set.
+    if (mapArgs.count("-gen"))
+    {
+        fGenerateBitcoins = GetBoolArg("-gen");
+        printf("fGenerateBitcoins = %d\n", fGenerateBitcoins);
+    }
 
     if (mapArgs.count("-proxy"))
     {

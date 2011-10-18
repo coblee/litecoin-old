@@ -122,16 +122,19 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     QFrame *frameBlocks = new QFrame();
     //frameBlocks->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     frameBlocks->setContentsMargins(0,0,0,0);
-    frameBlocks->setMinimumWidth(56);
-    frameBlocks->setMaximumWidth(56);
+    frameBlocks->setMinimumWidth(73);
+    frameBlocks->setMaximumWidth(73);
     QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
     labelEncryptionIcon = new QLabel();
+    labelMiningIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
     labelBlocksIcon = new QLabel();
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelEncryptionIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelMiningIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelConnectionsIcon);
     frameBlocksLayout->addStretch();
@@ -243,6 +246,9 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
 
     setNumBlocks(clientModel->getNumBlocks());
     connect(clientModel, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocks(int)));
+
+    setHashrate(clientModel->getHashrate());
+    connect(clientModel, SIGNAL(hashrateChanged(int)), this, SLOT(setHashrate(int)));
 
     // Report errors from network/worker thread
     connect(clientModel, SIGNAL(error(QString,QString)), this, SLOT(error(QString,QString)));
@@ -395,6 +401,15 @@ void BitcoinGUI::setNumBlocks(int count)
     labelBlocksIcon->setToolTip(tooltip);
     progressBarLabel->setToolTip(tooltip);
     progressBar->setToolTip(tooltip);
+}
+
+void BitcoinGUI::setHashrate(int hashrate)
+{
+    labelMiningIcon->setPixmap(QIcon(":/icons/tx_mined").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    if (hashrate > 0)
+        labelMiningIcon->setToolTip(tr("Mining litecoins at %1 hahes per second").arg(hashrate));
+    else
+        labelMiningIcon->setToolTip(tr("Not mining litecoins"));
 }
 
 void BitcoinGUI::error(const QString &title, const QString &message)
