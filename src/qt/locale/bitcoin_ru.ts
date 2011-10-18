@@ -6,17 +6,18 @@
     <name>AboutDialog</name>
     <message>
         <location filename="../forms/aboutdialog.ui" line="14"/>
-        <source>About Bitcoin</source>
-        <translation>О Bitcoin&apos;е</translation>
+        <source>About Litecoin</source>
+        <translation>О Litecoin&apos;е</translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="53"/>
-        <source>&lt;b&gt;Bitcoin&lt;/b&gt; version</source>
-        <translation>Версия Bitcoin&apos;а</translation>
+        <source>&lt;b&gt;Litecoin&lt;/b&gt; version</source>
+        <translation>Версия Litecoin&apos;а</translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="85"/>
         <source>Copyright © 2009-2011 Bitcoin Developers
+Copyright © 2011 Litecoin Developers
 
 This is experimental software.
 
@@ -41,7 +42,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="20"/>
-        <source>These are your Bitcoin addresses for receiving payments.  You may want to give a different one to each sender so you can keep track of who is paying you.</source>
+        <source>These are your Litecoin addresses for receiving payments.  You may want to give a different one to each sender so you can keep track of who is paying you.</source>
         <translation>Здесь перечислены Ваши адреса для получения платежей.  Вы можете использовать их для того, чтобы давать разным людям разные адреса и таким образом иметь возможность отслеживать кто и сколько Вам платил, а так же поддерживать бо́льшую анонимность..</translation>
     </message>
     <message>
@@ -204,7 +205,7 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="102"/>
-        <source>Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
+        <source>Remember that encrypting your wallet cannot fully protect your litecoins from being stolen by malware infecting your computer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -253,8 +254,8 @@ Are you sure you wish to encrypt your wallet?</source>
     <name>BitcoinGUI</name>
     <message>
         <location filename="../bitcoingui.cpp" line="59"/>
-        <source>Bitcoin Wallet</source>
-        <translation>Bitcoin-бумажник</translation>
+        <source>Litecoin Wallet</source>
+        <translation>Litecoin-бумажник</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="67"/>
@@ -338,7 +339,7 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="190"/>
-        <source>Send coins to a bitcoin address</source>
+        <source>Send coins to a litecoin address</source>
         <translation>Отправить монеты на указанный адрес</translation>
     </message>
     <message>
@@ -358,8 +359,8 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="203"/>
-        <source>Show information about Bitcoin</source>
-        <translation>Показать информацию о Bitcoin&apos;е</translation>
+        <source>Show information about Litecoin</source>
+        <translation>Показать информацию о Litecoin&apos;е</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="204"/>
@@ -368,17 +369,17 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="205"/>
-        <source>Modify configuration options for bitcoin</source>
+        <source>Modify configuration options for litecoin</source>
         <translation>Изменить настройки</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="206"/>
-        <source>Open &amp;Bitcoin</source>
+        <source>Open &amp;Litecoin</source>
         <translation>&amp;Показать бумажник</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="207"/>
-        <source>Show the Bitcoin window</source>
+        <source>Show the Litecoin window</source>
         <translation>Показать окно бумажника</translation>
     </message>
     <message>
@@ -418,12 +419,12 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="293"/>
-        <source>bitcoin-qt</source>
+        <source>litecoin-qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
         <location filename="../bitcoingui.cpp" line="332"/>
-        <source>%n active connection(s) to Bitcoin network</source>
+        <source>%n active connection(s) to Litecoin network</source>
         <translation>
             <numerusform>%n активное соединение с сетью</numerusform>
             <numerusform>%n активных соединений с сетью</numerusform>
@@ -619,8 +620,8 @@ Address: %4
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="92"/>
-        <source>The entered address &quot;%1&quot; is not a valid bitcoin address.</source>
-        <translation>Введённый адрес «%1» не является правильным Bitcoin-адресом.</translation>
+        <source>The entered address &quot;%1&quot; is not a valid litecoin address.</source>
+        <translation>Введённый адрес «%1» не является правильным Litecoin-адресом.</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="97"/>
@@ -637,12 +638,12 @@ Address: %4
     <name>MainOptionsPage</name>
     <message>
         <location filename="../optionsdialog.cpp" line="166"/>
-        <source>&amp;Start Bitcoin on window system startup</source>
+        <source>&amp;Start Litecoin on window system startup</source>
         <translation>&amp;Запускать бумажник при входе в систему</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="167"/>
-        <source>Automatically start Bitcoin after the computer is turned on</source>
+        <source>Automatically start Litecoin after the computer is turned on</source>
         <translation>Автоматически запускать бумажник, когда включается компьютер</translation>
     </message>
     <message>
@@ -662,8 +663,8 @@ Address: %4
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="175"/>
-        <source>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Автоматически открыть порт для Bitcoin-клиента на роутере. Работает ТОЛЬКО если Ваш роутер поддерживает UPnP и данная функция включена.</translation>
+        <source>Automatically open the Litecoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Автоматически открыть порт для Litecoin-клиента на роутере. Работает ТОЛЬКО если Ваш роутер поддерживает UPnP и данная функция включена.</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="178"/>
@@ -682,8 +683,8 @@ Address: %4
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="183"/>
-        <source>Connect to the Bitcon network through a SOCKS4 proxy (e.g. when connecting through Tor)</source>
-        <translation>Подключаться к сети Bitcoin через SOCKS4 прокси (например, при использовании Tor)</translation>
+        <source>Connect to the Litecoin network through a SOCKS4 proxy (e.g. when connecting through Tor)</source>
+        <translation>Подключаться к сети Litecoin через SOCKS4 прокси (например, при использовании Tor)</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="188"/>
@@ -975,8 +976,8 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../sendcoinsentry.cpp" line="21"/>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Введите Bitcoin-адрес (например 1LA5FtQhnnWnkK6zjFfutR7Stiit4wKd63)</translation>
+        <source>Enter a Litecoin address (e.g. Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)</source>
+        <translation>Введите Litecoin-адрес (например Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)</translation>
     </message>
 </context>
 <context>
@@ -1427,10 +1428,10 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>bitcoin-core</name>
+    <name>litecoin-core</name>
     <message>
         <location filename="../bitcoinstrings.cpp" line="3"/>
-        <source>Bitcoin version</source>
+        <source>Litecoin version</source>
         <translation>Версия</translation>
     </message>
     <message>
@@ -1440,7 +1441,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="5"/>
-        <source>Send command to -server or bitcoind
+        <source>Send command to -server or litecoind
 </source>
         <translation>Отправить команду на сервер ( -server ) или демону
 </translation>
@@ -1467,16 +1468,16 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="9"/>
-        <source>Specify configuration file (default: bitcoin.conf)
+        <source>Specify configuration file (default: litecoin.conf)
 </source>
-        <translation>Указать конфигурационный файл вместо используемого по умолчанию (bitcoin.conf)
+        <translation>Указать конфигурационный файл вместо используемого по умолчанию (litecoin.conf)
 </translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="10"/>
-        <source>Specify pid file (default: bitcoind.pid)
+        <source>Specify pid file (default: litecoind.pid)
 </source>
-        <translation>Указать pid-файл вместо используемого по умолчанию (bitcoin.pid)
+        <translation>Указать pid-файл вместо используемого по умолчанию (litecoin.pid)
 </translation>
     </message>
     <message>
@@ -1643,9 +1644,9 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../bitcoinstrings.cpp" line="34"/>
         <source>
-SSL options: (see the Bitcoin Wiki for SSL setup instructions)
+SSL options: (see the Litecoin Wiki for SSL setup instructions)
 </source>
-        <translation>Опции SSL: (см. Bitcoin Wiki для инструкций)
+        <translation>Опции SSL: (см. Litecoin Wiki для инструкций)
 </translation>
     </message>
     <message>
@@ -1685,7 +1686,7 @@ SSL options: (see the Bitcoin Wiki for SSL setup instructions)
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="44"/>
-        <source>Cannot obtain a lock on data directory %s.  Bitcoin is probably already running.</source>
+        <source>Cannot obtain a lock on data directory %s.  Litecoin is probably already running.</source>
         <translation>Невозможно установить блокировку на рабочую директорию %s.  Возможно, бумажник уже запущен.</translation>
     </message>
     <message>
@@ -1725,9 +1726,9 @@ SSL options: (see the Bitcoin Wiki for SSL setup instructions)
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="53"/>
-        <source>Error loading wallet.dat: Wallet requires newer version of Bitcoin      
+        <source>Error loading wallet.dat: Wallet requires newer version of Litecoin
 </source>
-        <translation>Ошибка загрузки wallet.dat: Для данного бумажника требуется более новая версия Bitcoin      
+        <translation>Ошибка загрузки wallet.dat: Для данного бумажника требуется более новая версия Litecoin
 </translation>
     </message>
     <message>
@@ -1944,7 +1945,7 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="112"/>
         <source>Wallet Encrypted.
-Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
+Remember that encrypting your wallet cannot fully protect your litecoins from being stolen by malware infecting your computer.</source>
         <translation>Бумажник зашифрован.
 Запомните, что шифрование Вашего бумажника не может ПОЛНОСТЬЮ гарантировать защиту Ваших биткоинов от того, чтобы быть украденными с помощью шпионского ПО на Вашем компьютере. Пожалуйста, следите за безопасностью Вашего компьютера самостоятельно.</translation>
     </message>
@@ -2084,8 +2085,8 @@ Label</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="150"/>
-        <source>Cannot write autostart/bitcoin.desktop file</source>
-        <translation>Не возможно записать файл autostart/bitcoin.desktop</translation>
+        <source>Cannot write autostart/litecoin.desktop file</source>
+        <translation>Не возможно записать файл autostart/litecoin.desktop</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="151"/>
@@ -2094,7 +2095,7 @@ Label</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="152"/>
-        <source>&amp;Start Bitcoin on window system startup</source>
+        <source>&amp;Start Litecoin on window system startup</source>
         <translation>&amp;Запускать бумажник при входе в систему</translation>
     </message>
     <message>
@@ -2278,8 +2279,8 @@ but the comment information will be blank.</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="198"/>
-        <source>Bitcoin Address</source>
-        <translation>Bitcoin-адрес</translation>
+        <source>Litecoin Address</source>
+        <translation>Litecoin-адрес</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="199"/>
@@ -2303,27 +2304,27 @@ but the comment information will be blank.</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="205"/>
-        <source>Bitcoin</source>
+        <source>Litecoin</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="206"/>
-        <source>Bitcoin - Generating</source>
-        <translation>Bitcoin - Генерация</translation>
+        <source>Litecoin - Generating</source>
+        <translation>Litecoin - Генерация</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="207"/>
-        <source>Bitcoin - (not connected)</source>
-        <translation>Bitcoin - (нет связи)</translation>
+        <source>Litecoin - (not connected)</source>
+        <translation>Litecoin - (нет связи)</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="208"/>
-        <source>&amp;Open Bitcoin</source>
+        <source>&amp;Open Litecoin</source>
         <translation>&amp;Показать бумажник</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="209"/>
-        <source>&amp;Send Bitcoins</source>
+        <source>&amp;Send Litecoins</source>
         <translation>Отп&amp;равка</translation>
     </message>
     <message>
@@ -2358,13 +2359,13 @@ but the comment information will be blank.</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="65"/>
-        <source>Unable to bind to port %d on this computer.  Bitcoin is probably already running.</source>
+        <source>Unable to bind to port %d on this computer.  Litecoin is probably already running.</source>
         <translation>Невозможно забиндить порт %d на данном компьютере.  Возможно, бумажник ужк запущен.</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="213"/>
-        <source>Warning: Please check that your computer&apos;s date and time are correct.  If your clock is wrong Bitcoin will not work properly.</source>
-        <translation>ВНИМАНИЕ: Проверьте дату и время, установленные на Вашем компьютере. Если Ваши часы идут не правильно Bitcoin может наботать не корректно.</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct.  If your clock is wrong Litecoin will not work properly.</source>
+        <translation>ВНИМАНИЕ: Проверьте дату и время, установленные на Вашем компьютере. Если Ваши часы идут не правильно Litecoin может наботать не корректно.</translation>
     </message>
 </context>
 </TS>

@@ -6,18 +6,19 @@
     <name>AboutDialog</name>
     <message>
         <location filename="../forms/aboutdialog.ui" line="14"/>
-        <source>About Bitcoin</source>
-        <translation>Over Bitcoin
+        <source>About Litecoin</source>
+        <translation>Over Litecoin
 </translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="53"/>
-        <source>&lt;b&gt;Bitcoin&lt;/b&gt; version</source>
-        <translation>&lt;b&gt;Bitcoin&lt;/b&gt; versie</translation>
+        <source>&lt;b&gt;Litecoin&lt;/b&gt; version</source>
+        <translation>&lt;b&gt;Litecoin&lt;/b&gt; versie</translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="85"/>
         <source>Copyright © 2009-2011 Bitcoin Developers
+Copyright © 2011 Litecoin Developers
 
 This is experimental software.
 
@@ -53,8 +54,8 @@ door Thomas Bernard.
         <translation type="obsolete">Ontvangen</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for receiving payments.  You may want to give a different one to each sender so you can keep track of who is paying you.  The highlighted address is displayed in the main window.</source>
-        <translation type="obsolete">Dit zijn je bitcoin-adressen voor het ontvangen van betalingen.  Het is een goed idee iedere afzender een ander adres te geven zodat je bij kunt houden wie je een betaling stuurt. Het geselecteerde adres is zichtbaar in het hoofdscherm.</translation>
+        <source>These are your Litecoin addresses for receiving payments.  You may want to give a different one to each sender so you can keep track of who is paying you.  The highlighted address is displayed in the main window.</source>
+        <translation type="obsolete">Dit zijn je litecoin-adressen voor het ontvangen van betalingen.  Het is een goed idee iedere afzender een ander adres te geven zodat je bij kunt houden wie je een betaling stuurt. Het geselecteerde adres is zichtbaar in het hoofdscherm.</translation>
     </message>
     <message>
         <source>Create a new address</source>
@@ -98,7 +99,7 @@ door Thomas Bernard.
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="20"/>
-        <source>These are your Bitcoin addresses for receiving payments.  You may want to give a different one to each sender so you can keep track of who is paying you.</source>
+        <source>These are your Litecoin addresses for receiving payments.  You may want to give a different one to each sender so you can keep track of who is paying you.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -265,7 +266,7 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="102"/>
-        <source>Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
+        <source>Remember that encrypting your wallet cannot fully protect your litecoins from being stolen by malware infecting your computer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -313,12 +314,12 @@ Are you sure you wish to encrypt your wallet?</source>
 <context>
     <name>BitcoinGUI</name>
     <message>
-        <source>Bitcoin</source>
-        <translation type="obsolete">Bitcoin</translation>
+        <source>Litecoin</source>
+        <translation type="obsolete">Litecoin</translation>
     </message>
     <message>
-        <source>Your Bitcoin address:</source>
-        <translation type="obsolete">Uw bitcoin-adres:</translation>
+        <source>Your Litecoin address:</source>
+        <translation type="obsolete">Uw litecoin-adres:</translation>
     </message>
     <message>
         <source>Your current default receiving address</source>
@@ -387,8 +388,8 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="190"/>
-        <source>Send coins to a bitcoin address</source>
-        <translation>Coins versturen naar een bitcoin-adres</translation>
+        <source>Send coins to a litecoin address</source>
+        <translation>Coins versturen naar een litecoin-adres</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="179"/>
@@ -397,7 +398,7 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="59"/>
-        <source>Bitcoin Wallet</source>
+        <source>Litecoin Wallet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -463,12 +464,12 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="202"/>
         <source>&amp;About</source>
-        <translation>&amp;Over Bitcoin</translation>
+        <translation>&amp;Over Litecoin</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="203"/>
-        <source>Show information about Bitcoin</source>
-        <translation>Laat informatie zien over Bitcoin</translation>
+        <source>Show information about Litecoin</source>
+        <translation>Laat informatie zien over Litecoin</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="208"/>
@@ -502,12 +503,12 @@ Are you sure you wish to encrypt your wallet?</source>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="293"/>
-        <source>bitcoin-qt</source>
+        <source>litecoin-qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
         <location filename="../bitcoingui.cpp" line="332"/>
-        <source>%n active connection(s) to Bitcoin network</source>
+        <source>%n active connection(s) to Litecoin network</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>
@@ -609,18 +610,18 @@ Address: %4
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="205"/>
-        <source>Modify configuration options for bitcoin</source>
-        <translation>Verander instellingen van Bitcoin</translation>
+        <source>Modify configuration options for litecoin</source>
+        <translation>Verander instellingen van Litecoin</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="206"/>
-        <source>Open &amp;Bitcoin</source>
+        <source>Open &amp;Litecoin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="207"/>
-        <source>Show the Bitcoin window</source>
-        <translation>Laat het Bitcoin-venster zien</translation>
+        <source>Show the Litecoin window</source>
+        <translation>Laat het Litecoin-venster zien</translation>
     </message>
     <message>
         <source>All transactions</source>
@@ -758,7 +759,7 @@ Address: %4
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="92"/>
-        <source>The entered address &quot;%1&quot; is not a valid bitcoin address.</source>
+        <source>The entered address &quot;%1&quot; is not a valid litecoin address.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -785,13 +786,13 @@ Address: %4
     <name>MainOptionsPage</name>
     <message>
         <location filename="../optionsdialog.cpp" line="166"/>
-        <source>&amp;Start Bitcoin on window system startup</source>
-        <translation>&amp;Start Bitcoin wanneer het systeem opstart</translation>
+        <source>&amp;Start Litecoin on window system startup</source>
+        <translation>&amp;Start Litecoin wanneer het systeem opstart</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="167"/>
-        <source>Automatically start Bitcoin after the computer is turned on</source>
-        <translation>Start Bitcoin automatisch wanneer het systeem start</translation>
+        <source>Automatically start Litecoin after the computer is turned on</source>
+        <translation>Start Litecoin automatisch wanneer het systeem start</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="170"/>
@@ -810,8 +811,8 @@ Address: %4
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="175"/>
-        <source>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Open de Bitcoin-poort automatisch op de router. Dit werkt alleen als de router UPnP ondersteunt.</translation>
+        <source>Automatically open the Litecoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Open de Litecoin-poort automatisch op de router. Dit werkt alleen als de router UPnP ondersteunt.</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="178"/>
@@ -830,8 +831,8 @@ Address: %4
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="183"/>
-        <source>Connect to the Bitcon network through a SOCKS4 proxy (e.g. when connecting through Tor)</source>
-        <translation>Verbind met het Bitcoin-netwerk door een SOCKS4 proxy (bijvoorbeeld Tor)</translation>
+        <source>Connect to the Litecoin network through a SOCKS4 proxy (e.g. when connecting through Tor)</source>
+        <translation>Verbind met het Litecoin-netwerk door een SOCKS4 proxy (bijvoorbeeld Tor)</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="188"/>
@@ -978,7 +979,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>The address to send the payment to  (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation type="obsolete">Voer een bitcoin-adres (bijvoorbeeld: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <translation type="obsolete">Voer een litecoin-adres (bijvoorbeeld: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -1009,8 +1010,8 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&amp;Hoeveelheid:</translation>
     </message>
     <message>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation type="obsolete">Voer een bitcoin-adres in (bijvoorbeeld: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Litecoin address (e.g. Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)</source>
+        <translation type="obsolete">Voer een litecoin-adres in (bijvoorbeeld: Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)</translation>
     </message>
     <message>
         <source>Add specified destination address to address book</source>
@@ -1154,7 +1155,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="93"/>
         <source>The address to send the payment to  (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation type="unfinished">Voer een bitcoin-adres (bijvoorbeeld: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <translation type="unfinished">Voer een litecoin-adres (bijvoorbeeld: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="103"/>
@@ -1183,8 +1184,8 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../sendcoinsentry.cpp" line="21"/>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation type="unfinished">Voer een bitcoin-adres in (bijvoorbeeld: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Litecoin address (e.g. Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)</source>
+        <translation type="unfinished">Voer een litecoin-adres in (bijvoorbeeld: Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)</translation>
     </message>
 </context>
 <context>
@@ -1708,11 +1709,11 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>bitcoin-core</name>
+    <name>litecoin-core</name>
     <message>
         <location filename="../bitcoinstrings.cpp" line="3"/>
-        <source>Bitcoin version</source>
-        <translation>Bitcoin</translation>
+        <source>Litecoin version</source>
+        <translation>Litecoin</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="4"/>
@@ -1721,9 +1722,9 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="5"/>
-        <source>Send command to -server or bitcoind
+        <source>Send command to -server or litecoind
 </source>
-        <translation>Zend commando naar -server of bitcoind
+        <translation>Zend commando naar -server of litecoind
 </translation>
     </message>
     <message>
@@ -1749,16 +1750,16 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="9"/>
-        <source>Specify configuration file (default: bitcoin.conf)
+        <source>Specify configuration file (default: litecoin.conf)
 </source>
-        <translation>Specifieer configuratiebestand (standaard: bitcoin.conf)
+        <translation>Specifieer configuratiebestand (standaard: litecoin.conf)
 </translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="10"/>
-        <source>Specify pid file (default: bitcoind.pid)
+        <source>Specify pid file (default: litecoind.pid)
 </source>
-        <translation>Specifieer pid-bestand (standaard: bitcoind.pid)
+        <translation>Specifieer pid-bestand (standaard: litecoind.pid)
 </translation>
     </message>
     <message>
@@ -1925,10 +1926,10 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../bitcoinstrings.cpp" line="34"/>
         <source>
-SSL options: (see the Bitcoin Wiki for SSL setup instructions)
+SSL options: (see the Litecoin Wiki for SSL setup instructions)
 </source>
         <translation>
-SSL opties: (zie de Bitcoin wiki voor SSL instructies)
+SSL opties: (zie de Litecoin wiki voor SSL instructies)
 </translation>
     </message>
     <message>
@@ -1967,8 +1968,8 @@ SSL opties: (zie de Bitcoin wiki voor SSL instructies)
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="44"/>
-        <source>Cannot obtain a lock on data directory %s.  Bitcoin is probably already running.</source>
-        <translation>Kan geen lock op de gegevensdirectory %s verkrijgen. Bitcoin draait vermoedelijk reeds.</translation>
+        <source>Cannot obtain a lock on data directory %s.  Litecoin is probably already running.</source>
+        <translation>Kan geen lock op de gegevensdirectory %s verkrijgen. Litecoin draait vermoedelijk reeds.</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="47"/>
@@ -2007,7 +2008,7 @@ SSL opties: (zie de Bitcoin wiki voor SSL instructies)
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="53"/>
-        <source>Error loading wallet.dat: Wallet requires newer version of Bitcoin      
+        <source>Error loading wallet.dat: Wallet requires newer version of Litecoin
 </source>
         <translation type="unfinished"></translation>
     </message>
@@ -2223,7 +2224,7 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="112"/>
         <source>Wallet Encrypted.
-Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
+Remember that encrypting your wallet cannot fully protect your litecoins from being stolen by malware infecting your computer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2360,7 +2361,7 @@ Label</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="150"/>
-        <source>Cannot write autostart/bitcoin.desktop file</source>
+        <source>Cannot write autostart/litecoin.desktop file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2370,8 +2371,8 @@ Label</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="152"/>
-        <source>&amp;Start Bitcoin on window system startup</source>
-        <translation type="unfinished">&amp;Start Bitcoin wanneer het systeem opstart</translation>
+        <source>&amp;Start Litecoin on window system startup</source>
+        <translation type="unfinished">&amp;Start Litecoin wanneer het systeem opstart</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="153"/>
@@ -2552,7 +2553,7 @@ but the comment information will be blank.</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="198"/>
-        <source>Bitcoin Address</source>
+        <source>Litecoin Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2577,27 +2578,27 @@ but the comment information will be blank.</source>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="205"/>
-        <source>Bitcoin</source>
-        <translation type="unfinished">Bitcoin</translation>
+        <source>Litecoin</source>
+        <translation type="unfinished">Litecoin</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="206"/>
-        <source>Bitcoin - Generating</source>
+        <source>Litecoin - Generating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="207"/>
-        <source>Bitcoin - (not connected)</source>
+        <source>Litecoin - (not connected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="208"/>
-        <source>&amp;Open Bitcoin</source>
+        <source>&amp;Open Litecoin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="209"/>
-        <source>&amp;Send Bitcoins</source>
+        <source>&amp;Send Litecoins</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2647,13 +2648,13 @@ but the comment information will be blank.</source>
         <translation>Onvoldoende saldo</translation>
     </message>
     <message>
-        <source>Invalid bitcoin address</source>
-        <translation type="obsolete">Foutief bitcoin-adres</translation>
+        <source>Invalid litecoin address</source>
+        <translation type="obsolete">Foutief litecoin-adres</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="65"/>
-        <source>Unable to bind to port %d on this computer.  Bitcoin is probably already running.</source>
-        <translation>Kan niet binden met poort %d op deze computer. Bitcoin draait vermoedelijk reeds.</translation>
+        <source>Unable to bind to port %d on this computer.  Litecoin is probably already running.</source>
+        <translation>Kan niet binden met poort %d op deze computer. Litecoin draait vermoedelijk reeds.</translation>
     </message>
     <message>
         <source>To use the %s option</source>
@@ -2679,8 +2680,8 @@ Als het bestand nog niet bestaat, maak het dan aan met enkel-leesbaar-door-eigen
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="213"/>
-        <source>Warning: Please check that your computer&apos;s date and time are correct.  If your clock is wrong Bitcoin will not work properly.</source>
-        <translation>Waarschuwing: Controleer of uw computers datum en tijd correct ingesteld zijn. Als uw klok fout staat zal Bitcoin niet correct werken.</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct.  If your clock is wrong Litecoin will not work properly.</source>
+        <translation>Waarschuwing: Controleer of uw computers datum en tijd correct ingesteld zijn. Als uw klok fout staat zal Litecoin niet correct werken.</translation>
     </message>
     <message>
         <source>-beta</source>
