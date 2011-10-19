@@ -234,8 +234,11 @@ int GetNetworkHashPS() {
     // Use the last 120 blocks.
     int lookup = 120;
 
+    // If just after a difficulty change, change lookup to not go past difficulty change.
     if (pindexBest->nHeight <= lookup)
-        return 0;
+        lookup = pindexBest->nHeight;
+    else if ((pindexBest->nHeight % 2016 + 1) < lookup)
+        lookup = pindexBest->nHeight % 2016 + 1;
 
     CBlockIndex* pindexPrev = pindexBest;
     for (int i = 0; i < lookup; i++)
