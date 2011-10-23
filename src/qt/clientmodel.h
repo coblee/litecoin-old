@@ -25,6 +25,7 @@ public:
     int getNumBlocks() const;
     int getNumBlocksAtStartup();
     int getHashrate() const;
+    double GetDifficulty() const;
 
     QDateTime getLastBlockDate() const;
 
