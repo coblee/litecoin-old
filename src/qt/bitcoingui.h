@@ -9,6 +9,7 @@ class ClientModel;
 class WalletModel;
 class TransactionView;
 class OverviewPage;
+class MiningPage;
 class AddressBookPage;
 class SendCoinsDialog;
 class Notificator;
@@ -53,6 +54,7 @@ private:
     QStackedWidget *centralWidget;
 
     OverviewPage *overviewPage;
+    MiningPage *miningPage;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
@@ -66,6 +68,7 @@ private:
     QProgressBar *progressBar;
 
     QAction *overviewAction;
+    QAction *miningAction;
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -104,6 +107,7 @@ public slots:
 private slots:
     // UI pages
     void gotoOverviewPage();
+    void gotoMiningPage();
     void gotoHistoryPage();
     void gotoAddressBookPage();
     void gotoReceiveCoinsPage();
