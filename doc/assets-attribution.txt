@@ -43,9 +43,9 @@ License: Creative Common Attribution-ShareAlike 3.0 License or LGPL
 Site: http://www.oxygen-icons.org/
 
 Icon: src/qt/res/icons/bitcoin.png, src/qt/res/icons/toolbar.png
-Designer: Bitboy (optimized for 16x16 by Wladimir van der Laan)
+Designer: BitcoinPorn (forum)
 License: Public Domain
-Site: http://forum.bitcoin.org/?topic=1756.0
+Site: https://bitcointalk.org/index.php?topic=47417.msg591988#msg591988
 
 Icon: src/qt/res/icons/overview.png
 Icon Pack: Primo
@@ -60,8 +60,8 @@ License: GNU/GPL
 Site: http://findicons.com/icon/17102/reload?id=17102
 
 Image: src/qt/res/images/splash2.jpg (Wallet image)
-Designer: Crobbo (forum)
-Site: https://bitcointalk.org/index.php?topic=32273.0
+Designer: Crobbo (forum), adapted to Litecoin by BitcoinPorn (forum)
+Site: https://bitcointalk.org/index.php?topic=32273.0, https://bitcointalk.org/index.php?topic=47417.msg591988#msg591988
 License: Public domain
 
 Icon: src/qt/res/icons/key.png
