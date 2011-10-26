@@ -16,7 +16,6 @@
 #define SHARE_FAIL 2
 #define ERROR 3
 #define LONGPOLL 4
-#define FATAL_ERROR 5
 
 namespace Ui {
     class MiningPage;
@@ -67,9 +66,16 @@ public slots:
     void readProcessOutput();
 
     QString getTime(QString);
+    void enableMiningControls(bool enable);
+    void enablePoolMiningControls(bool enable);
+    void typeChanged(int index);
+
+private slots:
 
 private:
     Ui::MiningPage *ui;
+
+    void resetMiningButton();
 };
 
 #endif // MININGPAGE_H
