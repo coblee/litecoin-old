@@ -310,33 +310,21 @@ QString MiningPage::getTime(QString time)
 
 void MiningPage::enableMiningControls(bool enable)
 {
-    ui->typeLabel->setEnabled(enable);
     ui->typeBox->setEnabled(enable);
-    ui->threadsLabel->setEnabled(enable);
     ui->threadsBox->setEnabled(enable);
-    ui->scantimeLabel->setEnabled(enable);
     ui->scantimeBox->setEnabled(enable);
-    ui->serverLabel->setEnabled(enable);
     ui->serverLine->setEnabled(enable);
-    ui->portLabel->setEnabled(enable);
     ui->portLine->setEnabled(enable);
-    ui->usernameLabel->setEnabled(enable);
     ui->usernameLine->setEnabled(enable);
-    ui->passwordLabel->setEnabled(enable);
     ui->passwordLine->setEnabled(enable);
 }
 
 void MiningPage::enablePoolMiningControls(bool enable)
 {
-    ui->scantimeLabel->setEnabled(enable);
     ui->scantimeBox->setEnabled(enable);
-    ui->serverLabel->setEnabled(enable);
     ui->serverLine->setEnabled(enable);
-    ui->portLabel->setEnabled(enable);
     ui->portLine->setEnabled(enable);
-    ui->usernameLabel->setEnabled(enable);
     ui->usernameLine->setEnabled(enable);
-    ui->passwordLabel->setEnabled(enable);
     ui->passwordLine->setEnabled(enable);
 }
 
