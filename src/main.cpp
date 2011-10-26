@@ -1135,6 +1135,7 @@ bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
 bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 {
     uint256 hash = GetHash();
+    bool lp = false;
 
     txdb.TxnBegin();
     if (pindexGenesisBlock == NULL && hash == hashGenesisBlock)
@@ -1177,6 +1178,7 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     // Update best block in wallet (so we can detect restored wallets)
     if (!IsInitialBlockDownload())
     {
+    lp = true;
         const CBlockLocator locator(pindexNew);
         ::SetBestChain(locator);
     }
@@ -1189,6 +1191,23 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     nTimeBestReceived = GetTime();
     nTransactionsUpdated++;
     printf("SetBestChain: new best=%s  height=%d  work=%s\n", hashBestChain.ToString().substr(0,20).c_str(), nBestHeight, bnBestChainWork.ToString().c_str());
+
+    if (lp)
+    {
+        // Support long polling
+        string lp_pid = mapArgs["-pollpidfile"];
+        if(lp_pid != "")
+        {
+            FILE *pidFile = fopen(lp_pid.c_str(), "r");
+            if(pidFile!=NULL)
+            {
+                int pid=0;
+                if ((fscanf(pidFile, "%d", &pid) == 1) && (pid > 1))
+                    kill((pid_t) pid, SIGUSR1);
+                fclose(pidFile);
+            }
+        }
+    }
 
     return true;
 }
