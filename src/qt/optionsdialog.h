@@ -12,7 +12,6 @@ QT_END_NAMESPACE
 class OptionsModel;
 class MainOptionsPage;
 class DisplayOptionsPage;
-class MiningOptionsPage;
 class MonitoredDataMapper;
 
 class OptionsDialog : public QDialog
@@ -44,7 +43,6 @@ private:
     // Pages
     MainOptionsPage *main_page;
     DisplayOptionsPage *display_page;
-    MiningOptionsPage *mining_page;
 
     void setupMainPage();
 };

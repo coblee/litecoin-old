@@ -60,27 +60,11 @@ public slots:
 
 };
 
-class MiningOptionsPage : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit MiningOptionsPage(QWidget *parent=0);
-
-    void setMapper(MonitoredDataMapper *mapper);
-private:
-    QCheckBox *generate;
-    QLineEdit *limit_processors;
-signals:
-
-public slots:
-
-};
-
 #include "optionsdialog.moc"
 
 OptionsDialog::OptionsDialog(QWidget *parent):
     QDialog(parent), contents_widget(0), pages_widget(0),
-    model(0), main_page(0), display_page(0), mining_page(0)
+    model(0), main_page(0), display_page(0)
 {
     contents_widget = new QListWidget();
     contents_widget->setMaximumWidth(128);
@@ -97,11 +81,6 @@ OptionsDialog::OptionsDialog(QWidget *parent):
     contents_widget->addItem(item_display);
     display_page = new DisplayOptionsPage(this);
     pages_widget->addWidget(display_page);
-
-    QListWidgetItem *item_mining = new QListWidgetItem(tr("Mining"));
-    contents_widget->addItem(item_mining);
-    mining_page = new MiningOptionsPage(this);
-    pages_widget->addWidget(mining_page);
 
     contents_widget->setCurrentRow(0);
 
@@ -143,7 +122,6 @@ void OptionsDialog::setModel(OptionsModel *model)
     mapper->setModel(model);
     main_page->setMapper(mapper);
     display_page->setMapper(mapper);
-    mining_page->setMapper(mapper);
 
     mapper->toFirst();
 }
@@ -300,41 +278,4 @@ void DisplayOptionsPage::setMapper(MonitoredDataMapper *mapper)
 {
     mapper->addMapping(unit, OptionsModel::DisplayUnit);
     mapper->addMapping(display_addresses, OptionsModel::DisplayAddresses);
-}
-
-MiningOptionsPage::MiningOptionsPage(QWidget *parent):
-        QWidget(parent)
-{
-    QVBoxLayout *layout = new QVBoxLayout();
-
-    generate = new QCheckBox(tr("&Mine Litecoins"));
-    generate->setToolTip(tr("Have the client mine litecoins in the background"));
-    layout->addWidget(generate);
-
-    QHBoxLayout *proc_hbox = new QHBoxLayout();
-    proc_hbox->addSpacing(18);
-    QLabel *limit_processors_label = new QLabel(tr("Limit &Threads: "));
-    proc_hbox->addWidget(limit_processors_label);
-    limit_processors = new QLineEdit();
-    limit_processors->setMaximumWidth(55);
-    limit_processors->setEnabled(false);
-    limit_processors->setValidator(new QIntValidator(-1, 256, this));
-    limit_processors->setToolTip(tr("Limit mining to this number of threads, -1 is unlimited"));
-    limit_processors_label->setBuddy(limit_processors);
-    proc_hbox->addWidget(limit_processors);
-    proc_hbox->addStretch(1);
-
-    layout->addLayout(proc_hbox);
-
-    layout->addStretch();
-
-    setLayout(layout);
-
-    connect(generate, SIGNAL(toggled(bool)), limit_processors, SLOT(setEnabled(bool)));
-}
-
-void MiningOptionsPage::setMapper(MonitoredDataMapper *mapper)
-{
-    mapper->addMapping(generate, OptionsModel::MiningGenerate);
-    mapper->addMapping(limit_processors, OptionsModel::MiningLimitProcessors);
 }
