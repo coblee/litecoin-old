@@ -151,6 +151,11 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
     return successful;
 }
 
+CWallet* OptionsModel::getWallet()
+{
+    return wallet;
+}
+
 qint64 OptionsModel::getTransactionFee()
 {
     return nTransactionFee;

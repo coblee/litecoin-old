@@ -112,7 +112,7 @@
       <number>100000</number>
      </property>
      <property name="dragDropMode">
-      <enum>QAbstractItemView::NoDragDrop</enum>
+      <enum>QAbstractItemView::DragOnly</enum>
      </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::NoSelection</enum>
@@ -135,7 +135,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Accepted: 0 - Rejected: 0</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -155,7 +155,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Speed: N/A</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -218,11 +218,11 @@
       <bool>false</bool>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <item>
       <property name="text">
-       <string>Solo Mining (not functional)</string>
+       <string>Solo Mining</string>
       </property>
      </item>
      <item>

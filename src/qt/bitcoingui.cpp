@@ -84,11 +84,11 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar->addAction(overviewAction);
-    toolbar->addAction(miningAction);
     toolbar->addAction(sendCoinsAction);
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    toolbar->addAction(miningAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -258,8 +258,8 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
     setNumBlocks(clientModel->getNumBlocks());
     connect(clientModel, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocks(int)));
 
-    setHashrate(clientModel->getHashrate());
-    connect(clientModel, SIGNAL(hashrateChanged(int)), this, SLOT(setHashrate(int)));
+    setMining(false, 0);
+    connect(clientModel, SIGNAL(miningChanged(bool,int)), this, SLOT(setMining(bool,int)));
 
     // Report errors from network/worker thread
     connect(clientModel, SIGNAL(error(QString,QString)), this, SLOT(error(QString,QString)));
@@ -279,6 +279,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
     addressBookPage->setModel(walletModel->getAddressTableModel());
     receiveCoinsPage->setModel(walletModel->getAddressTableModel());
     sendCoinsPage->setModel(walletModel);
+    miningPage->setModel(clientModel);
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
     connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
@@ -416,12 +417,12 @@ void BitcoinGUI::setNumBlocks(int count)
     progressBar->setToolTip(tooltip);
 }
 
-void BitcoinGUI::setHashrate(int hashrate)
+void BitcoinGUI::setMining(bool mining, int hashrate)
 {
-    if (hashrate > 0)
+    if (mining)
     {
         labelMiningIcon->setPixmap(QIcon(":/icons/mining_active").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        labelMiningIcon->setToolTip(tr("Mining litecoins at %1 hahes per second").arg(hashrate));
+        labelMiningIcon->setToolTip(tr("Mining litecoins at %1 hashes per second").arg(hashrate));
     }
     else
     {

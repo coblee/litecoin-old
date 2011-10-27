@@ -19,11 +19,34 @@ class ClientModel : public QObject
 public:
     explicit ClientModel(OptionsModel *optionsModel, QObject *parent = 0);
 
+    enum MiningType
+    {
+        SoloMining,
+        PoolMining
+    };
+
     OptionsModel *getOptionsModel();
 
     int getNumConnections() const;
     int getNumBlocks() const;
     int getNumBlocksAtStartup();
+    MiningType getMiningType() const;
+    int getMiningThreads() const;
+    bool getMiningStarted() const;
+
+    bool getMiningDebug() const;
+    void setMiningDebug(bool debug);
+    int getMiningScanTime() const;
+    void setMiningScanTime(int scantime);
+    QString getMiningServer() const;
+    void setMiningServer(QString server);
+    QString getMiningPort() const;
+    void setMiningPort(QString port);
+    QString getMiningUsername() const;
+    void setMiningUsername(QString username);
+    QString getMiningPassword() const;
+    void setMiningPassword(QString password);
+
     int getHashrate() const;
     double GetDifficulty() const;
 
@@ -36,6 +59,8 @@ public:
     // Return conservative estimate of total number of blocks, or 0 if unknown
     int getNumBlocksOfPeers() const;
 
+    void setMining(MiningType type, bool mining, int threads, int hashrate);
+
     QString formatFullVersion() const;
 
 private:
@@ -45,12 +70,22 @@ private:
     int cachedNumBlocks;
     int cachedHashrate;
 
+    MiningType miningType;
+    int miningThreads;
+    bool miningStarted;
+    bool miningDebug;
+    int miningScanTime;
+    QString miningServer;
+    QString miningPort;
+    QString miningUsername;
+    QString miningPassword;
+
     int numBlocksAtStartup;
 
 signals:
     void numConnectionsChanged(int count);
     void numBlocksChanged(int count);
-    void hashrateChanged(int count);
+    void miningChanged(bool mining, int count);
 
     // Asynchronous error notification
     void error(const QString &title, const QString &message);

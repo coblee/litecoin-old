@@ -37,6 +37,7 @@ public:
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
 
+    CWallet* getWallet();
     /* Explicit getters */
     qint64 getTransactionFee();
     bool getMinimizeToTray();

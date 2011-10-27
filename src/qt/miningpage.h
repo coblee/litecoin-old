@@ -1,6 +1,8 @@
 #ifndef MININGPAGE_H
 #define MININGPAGE_H
 
+#include "clientmodel.h"
+
 #include <QWidget>
 
 #include <QProcess>
@@ -20,6 +22,7 @@
 namespace Ui {
     class MiningPage;
 }
+class ClientModel;
 
 class MiningPage : public QWidget
 {
@@ -45,15 +48,17 @@ public:
 
     int initThreads;
 
+    void setModel(ClientModel *model);
+
 public slots:
     void startPressed();
 
-    void startMining();
-    void stopMining();
+    void startPoolMining();
+    void stopPoolMining();
 
     void updateSpeed();
 
-    void checkSettings();
+    void loadSettings();
     void saveSettings();
 
     void reportToList(QString, int, QString);
@@ -61,19 +66,22 @@ public slots:
     void minerStarted();
 
     void minerError(QProcess::ProcessError);
-    void minerFinished(int, QProcess::ExitStatus);
+    void minerFinished();
 
     void readProcessOutput();
 
     QString getTime(QString);
     void enableMiningControls(bool enable);
     void enablePoolMiningControls(bool enable);
+    ClientModel::MiningType getMiningType();
     void typeChanged(int index);
+    void debugToggled(bool checked);
 
 private slots:
 
 private:
     Ui::MiningPage *ui;
+    ClientModel *model;
 
     void resetMiningButton();
 };
