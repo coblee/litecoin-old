@@ -90,6 +90,7 @@ void MiningPage::startPoolMining()
     args << "--url" << urlLine.toAscii();
     args << "--userpass" << userpassLine.toAscii();
     args << "--threads" << ui->threadsBox->text().toAscii();
+    args << "-P"; // This is need for this to work correctly on Windows. Extra protocol dump helps flush the buffer quicker.
 
     threadSpeed.clear();
 
@@ -161,6 +162,10 @@ void MiningPage::readProcessOutput()
         for (i=0; i<list.size(); i++)
         {
             QString line = list.at(i);
+
+            // Ignore protocol dump
+            if (!line.startsWith("[") || line.contains("JSON protocol") || line.contains("HTTP hdr"))
+                continue;
 
             if (ui->debugCheckBox->isChecked())
             {
