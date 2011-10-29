@@ -90,6 +90,7 @@ void MiningPage::startPoolMining()
     args << "--url" << urlLine.toAscii();
     args << "--userpass" << userpassLine.toAscii();
     args << "--threads" << ui->threadsBox->text().toAscii();
+    args << "--retries" << "2880"; // Retry for 24 hours. Each retry pauses for 30 seconds.
     args << "-P"; // This is need for this to work correctly on Windows. Extra protocol dump helps flush the buffer quicker.
 
     threadSpeed.clear();
@@ -185,6 +186,8 @@ void MiningPage::readProcessOutput()
                 reportToList("Couldn't connect. Please check your username and password.", ERROR, NULL);
             else if (line.contains("HTTP request failed"))
                 reportToList("Couldn't connect. Please check pool server and port.", ERROR, NULL);
+            else if (line.contains("JSON-RPC call failed"))
+                reportToList("Couldn't communicate with server. Retrying in 30 seconds.", ERROR, NULL);
             else if (line.contains("thread ") && line.contains("khash/sec"))
             {
                 QString threadIDstr = line.at(line.indexOf("thread ")+7);
@@ -221,6 +224,7 @@ void MiningPage::minerFinished()
         reportToList("Solo mining stopped.", ERROR, NULL);
     else
         reportToList("Miner exited.", ERROR, NULL);
+    ui->list->addItem("");
     minerActive = false;
     resetMiningButton();
     model->setMining(getMiningType(), false, initThreads, 0);
