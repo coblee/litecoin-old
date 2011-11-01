@@ -90,7 +90,7 @@ void MiningPage::startPoolMining()
     args << "--url" << urlLine.toAscii();
     args << "--userpass" << userpassLine.toAscii();
     args << "--threads" << ui->threadsBox->text().toAscii();
-    args << "--retries" << "2880"; // Retry for 24 hours. Each retry pauses for 30 seconds.
+    args << "--retries" << "-1"; // Retry forever.
     args << "-P"; // This is need for this to work correctly on Windows. Extra protocol dump helps flush the buffer quicker.
 
     threadSpeed.clear();
@@ -212,7 +212,7 @@ void MiningPage::readProcessOutput()
 
 void MiningPage::minerError(QProcess::ProcessError error)
 {
-    if (error = QProcess::FailedToStart)
+    if (error == QProcess::FailedToStart)
     {
         reportToList("Miner failed to start. Make sure you have the minerd executable and libraries in the same directory as Litecoin-QT.", ERROR, NULL);
     }
