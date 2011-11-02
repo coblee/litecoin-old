@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include <QDir>
+#include <QFile>
 #include <QProcess>
 #include <QTime>
 #include <QTimer>

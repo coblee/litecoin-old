@@ -101,11 +101,15 @@ void MiningPage::startPoolMining()
     roundAcceptedShares = 0;
     roundRejectedShares = 0;
 
+    // If minerd is in current path, then use that. Otherwise, assume minerd is in the path somewhere.
 #ifdef WIN32
-    QString program = "minerd";
+    QString program = QDir::currentPath() + "\\minerd";
 #else
-    QString program = "./minerd";
+    QString program = QDir::currentPath() + "/minerd";
 #endif
+
+    if (!QFile::exists(program))
+        program = "minerd";
 
     if (ui->debugCheckBox->isChecked())
         ui->list->addItem(args.join(" ").prepend(" ").prepend(program));
@@ -121,7 +125,6 @@ void MiningPage::startPoolMining()
 void MiningPage::stopPoolMining()
 {
     ui->mineSpeedLabel->setText("");
-    ui->shareCount->setText("");
     minerProcess->kill();
     readTimer->stop();
 }
