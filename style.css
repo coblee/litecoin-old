@@ -1,3 +1,6 @@
+.logo { width: 50px; height:50px; vertical-align:middle; }
+.title { vertical-align:middle; }
+
 /*General Styles*/
 ::selection{color:#fff; background:#e25ece;}
 .alignleft{float:left; overflow:hidden;}
