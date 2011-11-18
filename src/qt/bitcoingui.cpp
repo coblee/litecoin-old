@@ -601,7 +601,9 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->hide();
         encryptWalletAction->setChecked(false);
         changePassphraseAction->setEnabled(false);
-        encryptWalletAction->setEnabled(true);
+//        encryptWalletAction->setEnabled(true);
+        // Litecoin: Disable encrypt wallet for now since it's not totally safe.
+        encryptWalletAction->setEnabled(false);
         break;
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
