@@ -34,7 +34,7 @@ static const int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
 static const int64 COIN = 100000000;
 static const int64 CENT = 1000000;
 static const int64 MIN_TX_FEE = 10000000; // Litecoin: minimum transaction fee of 0.1 LTC
-static const int64 MIN_RELAY_TX_FEE = 2000000; // Litecoin: minimum relay transaction fee of 0.02 LTC
+static const int64 MIN_RELAY_TX_FEE = MIN_TX_FEE; // Litecoin: minimum relay transaction fee same as minimum transaction fee.
 static const int64 MAX_MONEY = 84000000 * COIN; // Litecoin: maximum of 840k coins
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 static const int COINBASE_MATURITY = 100;
@@ -556,11 +556,10 @@ public:
             }
         }
 
-        // To limit dust spam, require MIN_TX_FEE/MIN_RELAY_TX_FEE if any output is less than 0.01
-        if (nMinFee < nBaseFee)
-            BOOST_FOREACH(const CTxOut& txout, vout)
-                if (txout.nValue < CENT)
-                    nMinFee = nBaseFee;
+        // To limit dust spam, add MIN_TX_FEE/MIN_RELAY_TX_FEE for any output that is less than 0.01
+        BOOST_FOREACH(const CTxOut& txout, vout)
+            if (txout.nValue < CENT)
+                nMinFee += nBaseFee;
 
         // Raise the price as the block approaches full
         if (nBlockSize != 1 && nNewBlockSize >= MAX_BLOCK_SIZE_GEN/2)
