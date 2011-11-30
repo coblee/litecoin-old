@@ -227,18 +227,17 @@ double GetDifficulty()
 }
 
 // Litecoin: Return average network hashes per second based on last number of blocks.
-int GetNetworkHashPS() {
+int GetNetworkHashPS(int lookup) {
     if (pindexBest == NULL)
         return 0;
 
-    // Use the last 120 blocks.
-    int lookup = 120;
-
-    // If just after a difficulty change, change lookup to not go past difficulty change.
-    if (pindexBest->nHeight <= lookup)
-        lookup = pindexBest->nHeight;
-    else if ((pindexBest->nHeight % 2016 + 1) < lookup)
+    // If lookup is -1, then use blocks since last difficulty change.
+    if (lookup <= 0)
         lookup = pindexBest->nHeight % 2016 + 1;
+
+    // If lookup is larger than chain, then set it to chain length.
+    if (lookup > pindexBest->nHeight)
+        lookup = pindexBest->nHeight;
 
     CBlockIndex* pindexPrev = pindexBest;
     for (int i = 0; i < lookup; i++)
@@ -263,12 +262,13 @@ Value getdifficulty(const Array& params, bool fHelp)
 
 Value getnetworkhashps(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() != 0)
+    if (fHelp || params.size() > 1)
         throw runtime_error(
-            "getnetworkhashps\n"
-            "Returns the estimated network hashes per second based on the last 120 blocks.");
+            "getnetworkhashps [blocks]\n"
+            "Returns the estimated network hashes per second based on the last 120 blocks.\n"
+            "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.");
 
-    return GetNetworkHashPS();
+    return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 120);
 }
 
 
@@ -341,7 +341,7 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("genproclimit",  (int)(fLimitProcessors ? nLimitProcessors : -1)));
     obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
     obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
-    obj.push_back(Pair("networkhashps", (int)GetNetworkHashPS()));
+    obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
     obj.push_back(Pair("testnet",       fTestNet));
     obj.push_back(Pair("keypoololdest", (boost::int64_t)pwalletMain->GetOldestKeyPoolTime()));
     obj.push_back(Pair("keypoolsize",   pwalletMain->GetKeyPoolSize()));
@@ -2513,6 +2513,7 @@ int CommandLineRPC(int argc, char *argv[])
         //
         if (strMethod == "setgenerate"            && n > 0) ConvertTo<bool>(params[0]);
         if (strMethod == "setgenerate"            && n > 1) ConvertTo<boost::int64_t>(params[1]);
+        if (strMethod == "getnetworkhashps"       && n > 0) ConvertTo<boost::int64_t>(params[0]);
         if (strMethod == "sendtoaddress"          && n > 1) ConvertTo<double>(params[1]);
         if (strMethod == "settxfee"               && n > 0) ConvertTo<double>(params[0]);
         if (strMethod == "setmininput"            && n > 0) ConvertTo<double>(params[0]);
