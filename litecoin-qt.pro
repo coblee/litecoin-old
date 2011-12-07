@@ -1,12 +1,14 @@
 TEMPLATE = app
 TARGET =
-VERSION = 0.5.0
+VERSION = 0.5.1
 INCLUDEPATH += src src/json src/qt
-DEFINES += QT_GUI
+DEFINES += QT_GUI BOOST_THREAD_USE_LIB
 CONFIG += no_include_pwd
 
 # for boost 1.37, add -mt to the boost libraries 
 # use: qmake BOOST_LIB_SUFFIX=-mt
+# for boost thread win32 with _win32 sufix
+# use: BOOST_THREAD_LIB_SUFFIX=_win32-...
 # or when linking against a specific BerkelyDB version: BDB_LIB_SUFFIX=-4.8
 
 # Dependency library locations can be customized with BOOST_INCLUDE_PATH, 
@@ -17,12 +19,32 @@ OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
 
-# use: qmake "USE_UPNP=0" (disable by default) or "USE_UPNP=1" (enable by default)
-# miniupnpc (http://miniupnp.free.fr/files/) must be installed
-count(USE_UPNP, 1) {
+# use: qmake "RELEASE=1"
+contains(RELEASE, 1) {
+    # Mac: compile for maximum compatibility (10.5, 32-bit)
+    macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.5 -arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk
+
+    !windows:!macx {
+        # Linux: static link
+        LIBS += -Wl,-Bstatic
+    }
+}
+
+# use: qmake "USE_UPNP=1" ( enabled by default; default)
+#  or: qmake "USE_UPNP=0" (disabled by default)
+#  or: qmake "USE_UPNP=-" (not supported)
+# miniupnpc (http://miniupnp.free.fr/files/) must be installed for support
+contains(USE_UPNP, -) {
+    message(Building without UPNP support)
+} else {
     message(Building with UPNP support)
-    DEFINES += USE_UPNP=$$USE_UPNP
-    LIBS += -lminiupnpc
+    count(USE_UPNP, 0) {
+        USE_UPNP=1
+    }
+    DEFINES += USE_UPNP=$$USE_UPNP STATICLIB
+    INCLUDEPATH += $$MINIUPNPC_INCLUDE_PATH
+    LIBS += $$join(MINIUPNPC_LIB_PATH,,-L,) -lminiupnpc
+    win32:LIBS += -liphlpapi
 }
 
 # use: qmake "USE_DBUS=1"
@@ -33,17 +55,25 @@ contains(USE_DBUS, 1) {
 }
 
 # use: qmake "USE_SSL=1"
-contains(USE_DBUS, 1) {
+contains(USE_SSL, 1) {
     message(Building with SSL support for RPC)
     DEFINES += USE_SSL
 }
 
-# for extra security against potential buffer overflows
-QMAKE_CXXFLAGS += -fstack-protector 
-QMAKE_LFLAGS += -fstack-protector
+contains(BITCOIN_NEED_QT_PLUGINS, 1) {
+    DEFINES += BITCOIN_NEED_QT_PLUGINS
+    QTPLUGIN += qcncodecs qjpcodecs qtwcodecs qkrcodecs
+}
+
+!windows {
+    # for extra security against potential buffer overflows
+    QMAKE_CXXFLAGS += -fstack-protector
+    QMAKE_LFLAGS += -fstack-protector
+    # do not enable this on windows, as it will result in a non-working executable!
+}
 
 # disable quite some warnings because bitcoin core "sins" a lot
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wno-invalid-offsetof -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare -Wno-char-subscripts  -Wno-unused-value -Wno-sequence-point -Wno-parentheses -Wno-unknown-pragmas -Wno-switch
+QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wno-strict-aliasing -Wno-invalid-offsetof -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare -Wno-char-subscripts  -Wno-unused-value -Wno-sequence-point -Wno-parentheses -Wno-unknown-pragmas -Wno-switch
 
 # Input
 DEPENDPATH += src/qt src src json/include
@@ -58,6 +88,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/bitcoinaddressvalidator.h \
     src/base58.h \
     src/bignum.h \
+    src/checkpoints.h \
     src/util.h \
     src/uint256.h \
     src/serialize.h \
@@ -124,6 +155,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/init.cpp \
     src/net.cpp \
     src/irc.cpp \
+    src/checkpoints.cpp \
     src/db.cpp \
     src/json/json_spirit_writer.cpp \
     src/json/json_spirit_value.cpp \
@@ -173,10 +205,8 @@ FORMS += \
 CODECFORTR = UTF-8
 
 # for lrelease/lupdate
-TRANSLATIONS = src/qt/locale/bitcoin_de.ts \
-    src/qt/locale/bitcoin_es.ts \
-    src/qt/locale/bitcoin_nl.ts \
-    src/qt/locale/bitcoin_ru.ts
+# also add new translations to src/qt/bitcoin.qrc under translations/
+TRANSLATIONS = $$files(src/qt/locale/bitcoin_*.ts)
 
 isEmpty(QMAKE_LRELEASE) {
     win32:QMAKE_LRELEASE = $$[QT_INSTALL_BINS]\lrelease.exe
@@ -202,6 +232,10 @@ isEmpty(BOOST_LIB_SUFFIX) {
     windows:BOOST_LIB_SUFFIX = -mgw44-mt-1_43
 }
 
+isEmpty(BOOST_THREAD_LIB_SUFFIX) {
+    BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
+}
+
 isEmpty(BDB_LIB_PATH) {
     macx:BDB_LIB_PATH = /opt/local/lib/db48
 }
@@ -222,11 +256,14 @@ isEmpty(BOOST_INCLUDE_PATH) {
     macx:BOOST_INCLUDE_PATH = /opt/local/include
 }
 
-windows:LIBS += -lws2_32 -lgdi32
+windows:LIBS += -lws2_32
 windows:DEFINES += WIN32
 windows:RC_FILE = src/qt/res/bitcoin-qt.rc
 
-macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0 BOOST_FILESYSTEM_VERSION=3
+macx:HEADERS += src/qt/macdockiconhandler.h
+macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm
+macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
+macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
 macx:ICON = src/qt/res/icons/bitcoin.icns
 macx:TARGET = "Litecoin-Qt"
 
@@ -234,7 +271,16 @@ macx:TARGET = "Litecoin-Qt"
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH
 LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,)
 LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
-LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_LIB_SUFFIX
+# -lgdi32 has to happen after -lcrypto (see  #681)
+windows:LIBS += -lgdi32
+LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX
+
+contains(RELEASE, 1) {
+    !windows:!macx {
+        # Linux: turn dynamic linking back on for c/c++ runtime libraries
+        LIBS += -Wl,-Bdynamic
+    }
+}
 
 system($$QMAKE_LRELEASE -silent $$_PRO_FILE_)
 

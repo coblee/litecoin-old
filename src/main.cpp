@@ -3,6 +3,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #include "headers.h"
+#include "checkpoints.h"
 #include "db.h"
 #include "net.h"
 #include "init.h"
@@ -29,7 +30,6 @@ map<COutPoint, CInPoint> mapNextTx;
 map<uint256, CBlockIndex*> mapBlockIndex;
 uint256 hashGenesisBlock("0x12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2");
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // Litecoin: starting difficulty is 1 / 2^12
-const int nTotalBlocksEstimate = 18144; // Conservative estimate of total nr of blocks on main chain
 const int nInitialBlockThreshold = 120; // Regard blocks up until N-threshold as "initial download"
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
@@ -71,6 +71,9 @@ int fUseUPnP = false;
 // dispatching functions
 //
 
+// These functions dispatch to one or all registered wallets
+
+
 void RegisterWallet(CWallet* pwalletIn)
 {
     CRITICAL_BLOCK(cs_setpwalletRegistered)
@@ -87,6 +90,7 @@ void UnregisterWallet(CWallet* pwalletIn)
     }
 }
 
+// check whether the passed transaction is from us
 bool static IsFromMe(CTransaction& tx)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
@@ -95,6 +99,7 @@ bool static IsFromMe(CTransaction& tx)
     return false;
 }
 
+// get the wallet transaction with the given hash (if it exists)
 bool static GetTransaction(const uint256& hashTx, CWalletTx& wtx)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
@@ -103,42 +108,49 @@ bool static GetTransaction(const uint256& hashTx, CWalletTx& wtx)
     return false;
 }
 
+// erases transaction with the given hash from all wallets
 void static EraseFromWallets(uint256 hash)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->EraseFromWallet(hash);
 }
 
+// make sure all wallets know about the given transaction, in the given block
 void static SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL, bool fUpdate = false)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->AddToWalletIfInvolvingMe(tx, pblock, fUpdate);
 }
 
+// notify wallets about a new best chain
 void static SetBestChain(const CBlockLocator& loc)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->SetBestChain(loc);
 }
 
+// notify wallets about an updated transaction
 void static UpdatedTransaction(const uint256& hashTx)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->UpdatedTransaction(hashTx);
 }
 
+// dump all wallets
 void static PrintWallets(const CBlock& block)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->PrintWallet(block);
 }
 
+// notify wallets about an incoming inventory (for request counts)
 void static Inventory(const uint256& hash)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->Inventory(hash);
 }
 
+// ask wallets to resend their transactions
 void static ResendWalletTransactions()
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
@@ -648,11 +660,32 @@ int64 static GetBlockValue(int nHeight, int64 nFees)
     return nSubsidy + nFees;
 }
 
+static const int64 nTargetTimespan = 3.5 * 24 * 60 * 60; // Litecoin: 3.5 days for diff retarget
+static const int64 nTargetSpacing = 2.5 * 60; // Litecoin: 2.5 minutes between blocks
+static const int64 nInterval = nTargetTimespan / nTargetSpacing;
+
+//
+// minimum amount of work that could possibly be required nTime after
+// minimum work required was nBase
+//
+unsigned int ComputeMinWork(unsigned int nBase, int64 nTime)
+{
+    CBigNum bnResult;
+    bnResult.SetCompact(nBase);
+    while (nTime > 0 && bnResult < bnProofOfWorkLimit)
+    {
+        // Maximum 400% adjustment...
+        bnResult *= 4;
+        // ... in best-case exactly 4-times-normal target time
+        nTime -= nTargetTimespan*4;
+    }
+    if (bnResult > bnProofOfWorkLimit)
+        bnResult = bnProofOfWorkLimit;
+    return bnResult.GetCompact();
+}
+
 unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast)
 {
-    const int64 nTargetTimespan = 3.5 * 24 * 60 * 60; // Litecoin: 3.5 days for diff retarget
-    const int64 nTargetSpacing = 2.5 * 60; // Litecoin: 2.5 minutes between blocks
-    const int64 nInterval = nTargetTimespan / nTargetSpacing; // Litecoin: 2016 blocks
 
     // Genesis block
     if (pindexLast == NULL)
@@ -716,28 +749,15 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits)
     return true;
 }
 
-// Return conservative estimate of total number of blocks, 0 if unknown
-int GetTotalBlocksEstimate()
-{
-    if(fTestNet)
-    {
-        return 0;
-    }
-    else
-    {
-        return nTotalBlocksEstimate;
-    }
-}
-
 // Return maximum amount of blocks that other nodes claim to have
 int GetNumBlocksOfPeers()
 {
-    return std::max(cPeerBlockCounts.median(), GetTotalBlocksEstimate());
+    return std::max(cPeerBlockCounts.median(), Checkpoints::GetTotalBlocksEstimate());
 }
 
 bool IsInitialBlockDownload()
 {
-    if (pindexBest == NULL || nBestHeight < (GetTotalBlocksEstimate()-nInitialBlockThreshold))
+    if (pindexBest == NULL || nBestHeight < (Checkpoints::GetTotalBlocksEstimate()-nInitialBlockThreshold))
         return true;
     static int64 nLastUpdate;
     static CBlockIndex* pindexLastBest;
@@ -1312,20 +1332,8 @@ bool CBlock::AcceptBlock()
             return DoS(10, error("AcceptBlock() : contains a non-final transaction"));
 
     // Check that the block chain matches the known block chain up to a checkpoint
-    if (!fTestNet)
-        if ((nHeight ==     1 && hash != uint256("0x80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f")) ||
-            (nHeight ==     2 && hash != uint256("0x13957807cdd1d02f993909fa59510e318763f99a506c4c426e3b254af09f40d7")) ||
-            (nHeight ==  1500 && hash != uint256("0x841a2965955dd288cfa707a755d05a54e45f8bd476835ec9af4402a2b59a2967")) ||
-            (nHeight ==  4032 && hash != uint256("0x9ce90e427198fc0ef05e5905ce3503725b80e26afd35a987965fd7e3d9cf0846")) ||
-            (nHeight ==  6048 && hash != uint256("0x3dd6e620060cf9c21aa4702413147329da0d1d6479dcca71076f5ba8d5fe00be")) ||
-            (nHeight ==  8064 && hash != uint256("0xeb984353fc5190f210651f150c40b8a4bab9eeeff0b729fcb3987da694430d70")) ||
-            (nHeight == 10080 && hash != uint256("0x2e1eaf34c79287fc8132f293aa78c5999966311766974d9ca529c4ecfdab3737")) ||
-            (nHeight == 12096 && hash != uint256("0x7fd90d37349af9057e0dea890971a8c2fa34457f63edb7db116aec9fb0670874")) ||
-            (nHeight == 14112 && hash != uint256("0x42d795d3e70b2d515e2d11179f26c2d50ed0a03c5c51f73b7fef3405cb1a93fd")) ||
-            (nHeight == 16128 && hash != uint256("0x602edf1859b7f9a6af809f1d9b0e6cb66fdc1d4d9dcd7a4bec03e12a1ccd153d")) ||
-            (nHeight == 18144 && hash != uint256("0x2c39f423fa76a6c36756633f6fd00714107731f5df1781c1b020e86383fde0e8")) ||
-            (nHeight == 23420 && hash != uint256("0xd80fdf9ca81afd0bd2b2a90ac3a9fe547da58f2530ec874e978fce0b5101b507")))
-            return DoS(100, error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight));
+    if (!Checkpoints::CheckBlock(nHeight, hash))
+        return DoS(100, error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight));
 
     printf("Got new block at height %d: %s\n", nHeight, hash.ToString().c_str());
 
@@ -1361,6 +1369,28 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // Preliminary checks
     if (!pblock->CheckBlock())
         return error("ProcessBlock() : CheckBlock FAILED");
+
+    CBlockIndex* pcheckpoint = Checkpoints::GetLastCheckpoint(mapBlockIndex);
+    if (pcheckpoint && pblock->hashPrevBlock != hashBestChain)
+    {
+        // Extra checks to prevent "fill up memory by spamming with bogus blocks"
+        int64 deltaTime = pblock->GetBlockTime() - pcheckpoint->nTime;
+        if (deltaTime < 0)
+        {
+            pfrom->Misbehaving(100);
+            return error("ProcessBlock() : block with timestamp before last checkpoint");
+        }
+        CBigNum bnNewBlock;
+        bnNewBlock.SetCompact(pblock->nBits);
+        CBigNum bnRequired;
+        bnRequired.SetCompact(ComputeMinWork(pcheckpoint->nBits, deltaTime));
+        if (bnNewBlock > bnRequired)
+        {
+            pfrom->Misbehaving(100);
+            return error("ProcessBlock() : block with too little proof-of-work");
+        }
+    }
+
 
     // If don't already have its previous block, shunt it off to holding area until we get it
     if (!mapBlockIndex.count(pblock->hashPrevBlock))

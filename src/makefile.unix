@@ -51,12 +51,17 @@ LIBS+= \
 # Hardening
 # Make some classes of vulnerabilities unexploitable in case one is discovered.
 #
+    # This is a workaround for Ubuntu bug #691722, the default -fstack-protector causes
+    # -fstack-protector-all to be ignored unless -fno-stack-protector is used first.
+    # see: https://bugs.launchpad.net/ubuntu/+source/gcc-4.5/+bug/691722
+    HARDENING=-fno-stack-protector
+
     # Stack Canaries
     # Put numbers at the beginning of each stack frame and check that they are the same.
     # If a stack buffer if overflowed, it writes over the canary number and then on return
     # when that number is checked, it won't be the same and the program will exit with
     # a "Stack smashing detected" error instead of being exploited.
-    HARDENING=-fstack-protector-all -Wstack-protector
+    HARDENING+=-fstack-protector-all -Wstack-protector
 
     # Make some important things such as the global offset table read only as soon as
     # the dynamic linker is finished building it. This will prevent overwriting of addresses
@@ -82,6 +87,7 @@ xCXXFLAGS=-pthread -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(HARDEN
 HEADERS = \
     base58.h \
     bignum.h \
+    checkpoints.h \
     crypter.h \
     db.h \
     headers.h \
@@ -103,6 +109,7 @@ HEADERS = \
     wallet.h
 
 OBJS= \
+    obj/checkpoints.o \
     obj/crypter.o \
     obj/db.o \
     obj/init.o \

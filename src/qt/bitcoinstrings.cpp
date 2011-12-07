@@ -71,6 +71,6 @@ QT_TRANSLATE_NOOP("bitcoin-core", ""
 "running."),
 QT_TRANSLATE_NOOP("bitcoin-core", ""
 "Warning: Please check that your computer's date and time are correct.  If "
-"your clock is wrong Bitcoin will not work properly."),
+"your clock is wrong Litecoin will not work properly."),
 QT_TRANSLATE_NOOP("bitcoin-core", "beta"),
 };

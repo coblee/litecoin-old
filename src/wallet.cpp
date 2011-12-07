@@ -39,9 +39,10 @@ bool CWallet::AddCryptedKey(const vector<unsigned char> &vchPubKey, const vector
         else
             return CWalletDB(strWalletFile).WriteCryptedKey(vchPubKey, vchCryptedSecret);
     }
+    return false;
 }
 
-bool CWallet::Unlock(const string& strWalletPassphrase)
+bool CWallet::Unlock(const SecureString& strWalletPassphrase)
 {
     if (!IsLocked())
         return false;
@@ -62,7 +63,7 @@ bool CWallet::Unlock(const string& strWalletPassphrase)
     return false;
 }
 
-bool CWallet::ChangeWalletPassphrase(const string& strOldWalletPassphrase, const string& strNewWalletPassphrase)
+bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase)
 {
     bool fWasLocked = IsLocked();
 
@@ -121,7 +122,7 @@ public:
     )
 };
 
-bool CWallet::EncryptWallet(const string& strWalletPassphrase)
+bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
 {
     if (IsCrypted())
         return false;
@@ -186,6 +187,13 @@ bool CWallet::EncryptWallet(const string& strWalletPassphrase)
         }
 
         Lock();
+        Unlock(strWalletPassphrase);
+        NewKeyPool();
+        Lock();
+
+        // Need to completely rewrite the wallet file; if we don't, bdb might keep
+        // bits of the unencrypted private key in slack space in the database file.
+        CDB::Rewrite(strWalletFile);
     }
 
     return true;
@@ -288,6 +296,9 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn)
     return true;
 }
 
+// Add a transaction to the wallet, or update it.
+// pblock is optional, but should be provided if the transaction is known to be in a block.
+// If fUpdate is true, existing transactions will be updated.
 bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblock, bool fUpdate)
 {
     uint256 hash = tx.GetHash();
@@ -550,6 +561,9 @@ bool CWalletTx::WriteToDisk()
     return CWalletDB(pwallet->strWalletFile).WriteTx(GetHash(), *this);
 }
 
+// Scan the block chain (starting in pindexStart) for transactions
+// from or to us. If fUpdate is true, found transactions that already
+// exist in the wallet will be updated.
 int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
 {
     int ret = 0;
@@ -1137,6 +1151,18 @@ int CWallet::LoadWallet(bool& fFirstRunRet)
         return false;
     fFirstRunRet = false;
     int nLoadWalletRet = CWalletDB(strWalletFile,"cr+").LoadWallet(this);
+    if (nLoadWalletRet == DB_NEED_REWRITE)
+    {
+        if (CDB::Rewrite(strWalletFile, "\x04pool"))
+        {
+            setKeyPool.clear();
+            // Note: can't top-up keypool here, because wallet is locked.
+            // User will be prompted to unlock wallet the next operation
+            // the requires a new key.
+        }
+        nLoadWalletRet = DB_NEED_REWRITE;
+    }
+
     if (nLoadWalletRet != DB_LOAD_OK)
         return nLoadWalletRet;
     fFirstRunRet = vchDefaultKey.empty();
@@ -1219,6 +1245,34 @@ bool GetWalletFile(CWallet* pwallet, string &strWalletFileOut)
     if (!pwallet->fFileBacked)
         return false;
     strWalletFileOut = pwallet->strWalletFile;
+    return true;
+}
+
+//
+// Mark old keypool keys as used,
+// and generate all new keys
+//
+bool CWallet::NewKeyPool()
+{
+    CRITICAL_BLOCK(cs_wallet)
+    {
+        CWalletDB walletdb(strWalletFile);
+        BOOST_FOREACH(int64 nIndex, setKeyPool)
+            walletdb.ErasePool(nIndex);
+        setKeyPool.clear();
+
+        if (IsLocked())
+            return false;
+
+        int64 nKeys = max(GetArg("-keypool", 100), (int64)0);
+        for (int i = 0; i < nKeys; i++)
+        {
+            int64 nIndex = i+1;
+            walletdb.WritePool(nIndex, CKeyPool(GenerateNewKey()));
+            setKeyPool.insert(nIndex);
+        }
+        printf("CWallet::NewKeyPool wrote %"PRI64d" new keys\n", nKeys);
+    }
     return true;
 }
 

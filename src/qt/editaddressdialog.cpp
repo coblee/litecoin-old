@@ -56,6 +56,8 @@ void EditAddressDialog::loadRow(int row)
 
 bool EditAddressDialog::saveCurrentRow()
 {
+    if(!model)
+        return false;
     switch(mode)
     {
     case NewReceivingAddress:
@@ -78,6 +80,8 @@ bool EditAddressDialog::saveCurrentRow()
 
 void EditAddressDialog::accept()
 {
+    if(!model)
+        return;
     if(!saveCurrentRow())
     {
         switch(model->getEditStatus())
@@ -112,4 +116,10 @@ void EditAddressDialog::accept()
 QString EditAddressDialog::getAddress() const
 {
     return address;
+}
+
+void EditAddressDialog::setAddress(const QString &address)
+{
+    this->address = address;
+    ui->addressEdit->setText(address);
 }

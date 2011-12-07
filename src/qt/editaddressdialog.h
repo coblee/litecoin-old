@@ -12,6 +12,8 @@ namespace Ui {
 }
 class AddressTableModel;
 
+/** Dialog for editing an address and associated information.
+ */
 class EditAddressDialog : public QDialog
 {
     Q_OBJECT
@@ -33,6 +35,7 @@ public:
     void accept();
 
     QString getAddress() const;
+    void setAddress(const QString &address);
 private:
     bool saveCurrentRow();
 

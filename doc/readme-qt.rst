@@ -1,5 +1,5 @@
-Litecoin-qt: Qt4 based GUI replacement for Litecoin
-=================================================
+Litecoin-qt: Qt4 GUI for Litecoin
+=================================
 
 Features
 ========
@@ -119,13 +119,13 @@ http://miniupnp.tuxfamily.org/files/.  UPnP support is not compiled in by defaul
 
 Set USE_UPNP to a different value to control this:
 
-+------------+--------------------------------------------------------------+
-| USE_UPNP=  | (the default) no UPnP support, miniupnpc not required;       |
-+------------+--------------------------------------------------------------+
-| USE_UPNP=0 | UPnP support turned off by default at runtime;               |
-+------------+--------------------------------------------------------------+
-| USE_UPNP=1 | UPnP support turned on by default at runtime.                |
-+------------+--------------------------------------------------------------+
++------------+--------------------------------------------------------------------------+
+| USE_UPNP=- | no UPnP support, miniupnpc not required;                                 |
++------------+--------------------------------------------------------------------------+
+| USE_UPNP=0 | (the default) built with UPnP, support turned off by default at runtime; |
++------------+--------------------------------------------------------------------------+
+| USE_UPNP=1 | build with UPnP support turned on by default at runtime.                 |
++------------+--------------------------------------------------------------------------+
 
 Mac OS X users: miniupnpc is currently outdated on MacPorts. An updated Portfile is provided in contrib/miniupnpc within this project.
 You can execute the following commands in a terminal to install it:
@@ -150,7 +150,7 @@ Berkely DB version warning
 
 A warning for people using the *static binary* version of Litecoin on a Linux/UNIX-ish system (tl;dr: **Berkely DB databases are not forward compatible**).
 
-The static binary version of Litecoin is linked against libdb4.7 or libdb4.8 (see also `this Debian issue`_).
+The static binary version of Litecoin is linked against libdb4.8 (see also `this Debian issue`_).
 
 Now the nasty thing is that databases from 5.X are not compatible with 4.X.
 
@@ -160,3 +160,19 @@ and 4.X cannot open the new format. This means that you cannot go back to the ol
 significant hassle!
 
 .. _`this Debian issue`: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=621425
+
+Ubuntu 11.10 warning
+====================
+
+Ubuntu 11.10 has a package called 'qt-at-spi' installed by default.  At the time of writing, having that package
+installed causes litecoin-qt to crash intermittently.  The issue has been reported as `launchpad bug 857790`_, but
+isn't yet fixed.
+
+Until the bug is fixed, you can remove the qt-at-spi package to work around the problem, though this will presumably
+disable screen reader functionality for Qt apps:
+
+::
+
+    sudo apt-get remove qt-at-spi
+
+.. _`launchpad bug 857790`: https://bugs.launchpad.net/ubuntu/+source/qt-at-spi/+bug/857790

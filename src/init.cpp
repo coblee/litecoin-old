@@ -12,6 +12,16 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 
+#if defined(BITCOIN_NEED_QT_PLUGINS) && !defined(_BITCOIN_QT_PLUGINS_INCLUDED)
+#define _BITCOIN_QT_PLUGINS_INCLUDED
+#define __INSURE__
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(qcncodecs)
+Q_IMPORT_PLUGIN(qjpcodecs)
+Q_IMPORT_PLUGIN(qtwcodecs)
+Q_IMPORT_PLUGIN(qkrcodecs)
+#endif
+
 using namespace std;
 using namespace boost;
 
@@ -34,8 +44,8 @@ void Shutdown(void* parg)
 {
     static CCriticalSection cs_Shutdown;
     static bool fTaken;
-    bool fFirstThread;
-    CRITICAL_BLOCK(cs_Shutdown)
+    bool fFirstThread = false;
+    TRY_CRITICAL_BLOCK(cs_Shutdown)
     {
         fFirstThread = !fTaken;
         fTaken = true;
@@ -162,10 +172,10 @@ bool AppInit2(int argc, char* argv[])
         string strUsage = string() +
           _("Litecoin version") + " " + FormatFullVersion() + "\n\n" +
           _("Usage:") + "\t\t\t\t\t\t\t\t\t\t\n" +
-            "  litecoin [options]                   \t  " + "\n" +
-            "  litecoin [options] <command> [params]\t  " + _("Send command to -server or litecoind\n") +
-            "  litecoin [options] help              \t\t  " + _("List commands\n") +
-            "  litecoin [options] help <command>    \t\t  " + _("Get help for a command\n") +
+            "  litecoind [options]                   \t  " + "\n" +
+            "  litecoind [options] <command> [params]\t  " + _("Send command to -server or litecoind\n") +
+            "  litecoind [options] help              \t\t  " + _("List commands\n") +
+            "  litecoind [options] help <command>    \t\t  " + _("Get help for a command\n") +
           _("Options:\n") +
             "  -conf=<file>     \t\t  " + _("Specify configuration file (default: litecoin.conf)\n") +
             "  -pid=<file>      \t\t  " + _("Specify pid file (default: litecoin.pid)\n") +
@@ -176,11 +186,16 @@ bool AppInit2(int argc, char* argv[])
             "  -timeout=<n>     \t  "   + _("Specify connection timeout (in milliseconds)\n") +
             "  -proxy=<ip:port> \t  "   + _("Connect through socks4 proxy\n") +
             "  -dns             \t  "   + _("Allow DNS lookups for addnode and connect\n") +
+            "  -port=<port>     \t\t  " + _("Listen for connections on <port> (default: 8333 or testnet: 18333)\n") +
+            "  -maxconnections=<n>\t  " + _("Maintain at most <n> connections to peers (default: 125)\n") +
             "  -addnode=<ip>    \t  "   + _("Add a node to connect to\n") +
             "  -connect=<ip>    \t\t  " + _("Connect only to the specified node\n") +
             "  -nolisten        \t  "   + _("Don't accept connections from outside\n") +
+            "  -nodnsseed       \t  "   + _("Don't bootstrap list of peers using DNS\n") +
             "  -banscore=<n>    \t  "   + _("Threshold for disconnecting misbehaving peers (default: 100)\n") +
             "  -bantime=<n>     \t  "   + _("Number of seconds to keep misbehaving peers from reconnecting (default: 86400)\n") +
+            "  -maxreceivebuffer=<n>\t  " + _("Maximum per-connection receive buffer, <n>*1000 bytes (default: 10000)\n") +
+            "  -maxsendbuffer=<n>\t  "   + _("Maximum per-connection send buffer, <n>*1000 bytes (default: 10000)\n") +
 #ifdef USE_UPNP
 #if USE_UPNP
             "  -noupnp          \t  "   + _("Don't attempt to use UPnP to map the listening port\n") +
@@ -197,6 +212,12 @@ bool AppInit2(int argc, char* argv[])
             "  -daemon          \t\t  " + _("Run in the background as a daemon and accept commands\n") +
 #endif
             "  -testnet         \t\t  " + _("Use the test network\n") +
+            "  -debug           \t\t  " + _("Output extra debugging information\n") +
+            "  -logtimestamps   \t  "   + _("Prepend debug output with timestamp\n") +
+            "  -printtoconsole  \t  "   + _("Send trace/debug info to console instead of debug.log file\n") +
+#ifdef WIN32
+            "  -printtodebugger \t  "   + _("Send trace/debug info to debugger\n") +
+#endif
             "  -rpcuser=<user>  \t  "   + _("Username for JSON-RPC connections\n") +
             "  -rpcpassword=<pw>\t  "   + _("Password for JSON-RPC connections\n") +
             "  -rpcport=<port>  \t\t  " + _("Listen for JSON-RPC connections on <port> (default: 9332)\n") +
@@ -353,6 +374,12 @@ bool AppInit2(int argc, char* argv[])
             strErrors += _("Error loading wallet.dat: Wallet corrupted      \n");
         else if (nLoadWalletRet == DB_TOO_NEW)
             strErrors += _("Error loading wallet.dat: Wallet requires newer version of Litecoin      \n");
+        else if (nLoadWalletRet == DB_NEED_REWRITE)
+        {
+            strErrors += _("Wallet needed to be rewritten: restart Litecoin to complete    \n");
+            wxMessageBox(strErrors, "Litecoin", wxOK | wxICON_ERROR);
+            return false;
+        }
         else
             strErrors += _("Error loading wallet.dat      \n");
     }
@@ -465,11 +492,6 @@ bool AppInit2(int argc, char* argv[])
                 AddAddress(addr);
         }
     }
-
-    if (GetBoolArg("-nodnsseed"))
-        printf("DNS seeding disabled\n");
-    else
-        DNSAddressSeed();
 
     if (mapArgs.count("-paytxfee"))
     {

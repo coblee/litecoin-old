@@ -51,6 +51,7 @@ CFLAGS=-mmacosx-version-min=10.5 -arch x86_64 -O3 -Wno-invalid-offsetof -Wformat
 HEADERS = \
     base58.h \
     bignum.h \
+    checkpoints.h \
     crypter.h \
     db.h \
     headers.h \
@@ -72,6 +73,7 @@ HEADERS = \
     wallet.h
 
 OBJS= \
+    obj/checkpoints.o \
     obj/crypter.o \
     obj/db.o \
     obj/init.o \

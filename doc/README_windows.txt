@@ -1,4 +1,4 @@
-Litecoin 0.4.1 BETA
+Litecoin 0.5.1 BETA
 
 Copyright (c) 2009-2011 Bitcoin Developers
 Copyright (c) 2011 Litecoin Developers
@@ -19,7 +19,7 @@ with each other, with the help of a P2P network to check for double-spending.
 
 Setup
 -----
-Unpack the files into a directory and run litecoin.exe.
+Unpack the files into a directory and run litecoin-qt.exe.
 
 If you have Microsoft Security Essentials, you need to add litecoin.exe to its
 "Excluded processes" list.  Microsoft Security Essentials->Settings tab,
@@ -31,5 +31,6 @@ to forward port 9333 (TCP) to your computer so you can receive
 incoming connections.  Litecoin work without incoming connections,
 but allowing incoming connections helps the Litecoin network.
 
-See the bitcoin wiki at:  https://en.bitcoin.it/wiki/Main_Page
+See the bitcoin wiki at:
+  https://en.bitcoin.it/wiki/Main_Page
 for more help and information.

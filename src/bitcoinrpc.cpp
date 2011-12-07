@@ -36,6 +36,8 @@ void ThreadRPCServer2(void* parg);
 typedef Value(*rpcfn_type)(const Array& params, bool fHelp);
 extern map<string, rpcfn_type> mapCallTable;
 
+static std::string strRPCUserColonPass;
+
 static int64 nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 
@@ -126,6 +128,7 @@ Value help(const Array& params, bool fHelp)
         // We already filter duplicates, but these deprecated screw up the sort order
         if (strMethod == "getamountreceived" ||
             strMethod == "getallreceived" ||
+            strMethod == "getblocknumber" || // deprecated
             (strMethod.find("label") != string::npos))
             continue;
         if (strCommand != "" && strMethod != strCommand)
@@ -160,10 +163,13 @@ Value stop(const Array& params, bool fHelp)
         throw runtime_error(
             "stop\n"
             "Stop litecoin server.");
-
+#ifndef QT_GUI
     // Shutdown will take long enough that the response should get back
     CreateThread(Shutdown, NULL);
     return "litecoin server stopping";
+#else
+    throw runtime_error("NYI: cannot shut down GUI with RPC command");
+#endif
 }
 
 
@@ -178,12 +184,13 @@ Value getblockcount(const Array& params, bool fHelp)
 }
 
 
+// deprecated
 Value getblocknumber(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
             "getblocknumber\n"
-            "Returns the block number of the latest block in the longest block chain.");
+            "Deprecated.  Use getblockcount.");
 
     return nBestHeight;
 }
@@ -1501,21 +1508,16 @@ Value walletpassphrase(const Array& params, bool fHelp)
         throw JSONRPCError(-17, "Error: Wallet is already unlocked.");
 
     // Note that the walletpassphrase is stored in params[0] which is not mlock()ed
-    string strWalletPass;
+    SecureString strWalletPass;
     strWalletPass.reserve(100);
-    mlock(&strWalletPass[0], strWalletPass.capacity());
-    strWalletPass = params[0].get_str();
+    // TODO: get rid of this .c_str() by implementing SecureString::operator=(std::string)
+    // Alternately, find a way to make params[0] mlock()'d to begin with.
+    strWalletPass = params[0].get_str().c_str();
 
     if (strWalletPass.length() > 0)
     {
         if (!pwalletMain->Unlock(strWalletPass))
-        {
-            fill(strWalletPass.begin(), strWalletPass.end(), '\0');
-            munlock(&strWalletPass[0], strWalletPass.capacity());
             throw JSONRPCError(-14, "Error: The wallet passphrase entered was incorrect.");
-        }
-        fill(strWalletPass.begin(), strWalletPass.end(), '\0');
-        munlock(&strWalletPass[0], strWalletPass.capacity());
     }
     else
         throw runtime_error(
@@ -1541,15 +1543,15 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
     if (!pwalletMain->IsCrypted())
         throw JSONRPCError(-15, "Error: running with an unencrypted wallet, but walletpassphrasechange was called.");
 
-    string strOldWalletPass;
+    // TODO: get rid of these .c_str() calls by implementing SecureString::operator=(std::string)
+    // Alternately, find a way to make params[0] mlock()'d to begin with.
+    SecureString strOldWalletPass;
     strOldWalletPass.reserve(100);
-    mlock(&strOldWalletPass[0], strOldWalletPass.capacity());
-    strOldWalletPass = params[0].get_str();
+    strOldWalletPass = params[0].get_str().c_str();
 
-    string strNewWalletPass;
+    SecureString strNewWalletPass;
     strNewWalletPass.reserve(100);
-    mlock(&strNewWalletPass[0], strNewWalletPass.capacity());
-    strNewWalletPass = params[1].get_str();
+    strNewWalletPass = params[1].get_str().c_str();
 
     if (strOldWalletPass.length() < 1 || strNewWalletPass.length() < 1)
         throw runtime_error(
@@ -1557,17 +1559,7 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
             "Changes the wallet passphrase from <oldpassphrase> to <newpassphrase>.");
 
     if (!pwalletMain->ChangeWalletPassphrase(strOldWalletPass, strNewWalletPass))
-    {
-        fill(strOldWalletPass.begin(), strOldWalletPass.end(), '\0');
-        fill(strNewWalletPass.begin(), strNewWalletPass.end(), '\0');
-        munlock(&strOldWalletPass[0], strOldWalletPass.capacity());
-        munlock(&strNewWalletPass[0], strNewWalletPass.capacity());
         throw JSONRPCError(-14, "Error: The wallet passphrase entered was incorrect.");
-    }
-    fill(strNewWalletPass.begin(), strNewWalletPass.end(), '\0');
-    fill(strOldWalletPass.begin(), strOldWalletPass.end(), '\0');
-    munlock(&strOldWalletPass[0], strOldWalletPass.capacity());
-    munlock(&strNewWalletPass[0], strNewWalletPass.capacity());
 
     return Value::null;
 }
@@ -1607,10 +1599,16 @@ Value encryptwallet(const Array& params, bool fHelp)
     if (pwalletMain->IsCrypted())
         throw JSONRPCError(-15, "Error: running with an encrypted wallet, but encryptwallet was called.");
 
-    string strWalletPass;
+#ifdef QT_GUI
+    // shutting down via RPC while the GUI is running does not work (yet):
+    throw runtime_error("Not Yet Implemented: use GUI to encrypt wallet, not RPC command");
+#endif
+
+    // TODO: get rid of this .c_str() by implementing SecureString::operator=(std::string)
+    // Alternately, find a way to make params[0] mlock()'d to begin with.
+    SecureString strWalletPass;
     strWalletPass.reserve(100);
-    mlock(&strWalletPass[0], strWalletPass.capacity());
-    strWalletPass = params[0].get_str();
+    strWalletPass = params[0].get_str().c_str();
 
     if (strWalletPass.length() < 1)
         throw runtime_error(
@@ -1618,15 +1616,13 @@ Value encryptwallet(const Array& params, bool fHelp)
             "Encrypts the wallet with <passphrase>.");
 
     if (!pwalletMain->EncryptWallet(strWalletPass))
-    {
-        fill(strWalletPass.begin(), strWalletPass.end(), '\0');
-        munlock(&strWalletPass[0], strWalletPass.capacity());
         throw JSONRPCError(-16, "Error: Failed to encrypt the wallet.");
-    }
-    fill(strWalletPass.begin(), strWalletPass.end(), '\0');
-    munlock(&strWalletPass[0], strWalletPass.capacity());
 
-    return Value::null;
+    // BDB seems to have a bad habit of writing old data into
+    // slack space in .dat files; that is bad if the old data is
+    // unencrypted private keys.  So:
+    CreateThread(Shutdown, NULL);
+    return "wallet encrypted; litecoin server stopping, restart to run with encrypted wallet";
 }
 
 
@@ -1913,7 +1909,7 @@ string pAllowInSafeMode[] =
     "help",
     "stop",
     "getblockcount",
-    "getblocknumber",
+    "getblocknumber",  // deprecated
     "getconnectioncount",
     "getdifficulty",
     "getnetworkhashps",
@@ -2085,12 +2081,7 @@ bool HTTPAuthorized(map<string, string>& mapHeaders)
         return false;
     string strUserPass64 = strAuth.substr(6); boost::trim(strUserPass64);
     string strUserPass = DecodeBase64(strUserPass64);
-    string::size_type nColon = strUserPass.find(":");
-    if (nColon == string::npos)
-        return false;
-    string strUser = strUserPass.substr(0, nColon);
-    string strPassword = strUserPass.substr(nColon+1);
-    return (strUser == mapArgs["-rpcuser"] && strPassword == mapArgs["-rpcpassword"]);
+    return strUserPass == strRPCUserColonPass;
 }
 
 //
@@ -2223,7 +2214,8 @@ void ThreadRPCServer2(void* parg)
 {
     printf("ThreadRPCServer started\n");
 
-    if (mapArgs["-rpcuser"] == "" && mapArgs["-rpcpassword"] == "")
+    strRPCUserColonPass = mapArgs["-rpcuser"] + ":" + mapArgs["-rpcpassword"];
+    if (strRPCUserColonPass == ":")
     {
         string strWhatAmI = "To use litecoind";
         if (mapArgs.count("-server"))
@@ -2231,11 +2223,13 @@ void ThreadRPCServer2(void* parg)
         else if (mapArgs.count("-daemon"))
             strWhatAmI = strprintf(_("To use the %s option"), "\"-daemon\"");
         PrintConsole(
-            _("Warning: %s, you must set rpcpassword=<password>\nin the configuration file: %s\n"
+            _("Error: %s, you must set rpcpassword=<password>\nin the configuration file: %s\n"
               "If the file does not exist, create it with owner-readable-only file permissions.\n"),
                 strWhatAmI.c_str(),
                 GetConfigFile().c_str());
+#ifndef QT_GUI
         CreateThread(Shutdown, NULL);
+#endif
         return;
     }
 

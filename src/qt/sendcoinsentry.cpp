@@ -17,6 +17,10 @@ SendCoinsEntry::SendCoinsEntry(QWidget *parent) :
 {
     ui->setupUi(this);
 
+#ifdef Q_WS_MAC
+    ui->payToLayout->setSpacing(4);
+#endif
+
 #if QT_VERSION >= 0x040700
     ui->payTo->setPlaceholderText(tr("Enter a Litecoin address (e.g. Ler4HNAEfwYhBmGXcFP2Po1NpRUEiK8km2)"));
     ui->addAsLabel->setPlaceholderText(tr("Enter a label for this address to add it to your address book"));
@@ -40,6 +44,8 @@ void SendCoinsEntry::on_pasteButton_clicked()
 
 void SendCoinsEntry::on_addressBookButton_clicked()
 {
+    if(!model)
+        return;
     AddressBookPage dlg(AddressBookPage::ForSending, AddressBookPage::SendingTab, this);
     dlg.setModel(model->getAddressTableModel());
     if(dlg.exec())
@@ -51,6 +57,8 @@ void SendCoinsEntry::on_addressBookButton_clicked()
 
 void SendCoinsEntry::on_payTo_textChanged(const QString &address)
 {
+    if(!model)
+        return;
     ui->addAsLabel->setText(model->getAddressTableModel()->labelForAddress(address));
 }
 
@@ -70,7 +78,7 @@ void SendCoinsEntry::clear()
     ui->addAsLabel->clear();
     ui->payAmount->clear();
     ui->payTo->setFocus();
-    if(model)
+    if(model && model->getOptionsModel())
     {
         ui->payAmount->setDisplayUnit(model->getOptionsModel()->getDisplayUnit());
     }
