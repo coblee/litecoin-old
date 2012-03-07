@@ -112,7 +112,7 @@ std::string _(const char* psz)
 
 int main(int argc, char *argv[])
 {
-	// Internal string conversion is all UTF-8
+    // Internal string conversion is all UTF-8
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForTr());
 
