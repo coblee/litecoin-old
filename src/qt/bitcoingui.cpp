@@ -158,8 +158,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
 BitcoinGUI::~BitcoinGUI()
 {
-	if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
-		trayIcon->hide();
+    if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
+	trayIcon->hide();
+	
 #ifdef Q_WS_MAC
     delete appMenuBar;
 #endif
@@ -454,7 +455,7 @@ void BitcoinGUI::setNumBlocks(int count)
     // Represent time from last generated block in human readable text
     if(secs <= 0)
     {
-    	// Fully up to date. Leave text empty.
+    	secs = 0;
     }
     else if(secs < 60)
     {
@@ -486,11 +487,8 @@ void BitcoinGUI::setNumBlocks(int count)
         syncIconMovie->start();
     }
 	
-	if(!text.isEmpty())
-	{
     	tooltip += QString("\n");
     	tooltip += tr("Last received block was generated %1.").arg(text);
-	}
 	
     labelBlocksIcon->setToolTip(tooltip);
     progressBarLabel->setToolTip(tooltip);
