@@ -114,7 +114,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
-    //frameBlocks->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     frameBlocks->setContentsMargins(0,0,0,0);
     frameBlocks->setMinimumWidth(73);
     frameBlocks->setMaximumWidth(73);
@@ -159,6 +158,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
 BitcoinGUI::~BitcoinGUI()
 {
+    if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
+	trayIcon->hide();
+	
 #ifdef Q_WS_MAC
     delete appMenuBar;
 #endif
@@ -223,7 +225,7 @@ void BitcoinGUI::createActions()
     openBitcoinAction = new QAction(QIcon(":/icons/bitcoin"), tr("Open &Litecoin"), this);
     openBitcoinAction->setToolTip(tr("Show the Litecoin window"));
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
-    exportAction->setToolTip(tr("Export the current view to a file"));
+    exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet"), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
     encryptWalletAction->setCheckable(true);
@@ -451,7 +453,11 @@ void BitcoinGUI::setNumBlocks(int count)
     QString text;
 
     // Represent time from last generated block in human readable text
-    if(secs < 60)
+    if(secs <= 0)
+    {
+    	secs = 0;
+    }
+    else if(secs < 60)
     {
         text = tr("%n second(s) ago","",secs);
     }
@@ -471,7 +477,7 @@ void BitcoinGUI::setNumBlocks(int count)
     // Set icon state: spinning if catching up, tick otherwise
     if(secs < 30*60)
     {
-        tooltip = tr("Up to date") + QString("\n") + tooltip;
+        tooltip = tr("Up to date") + QString(".\n") + tooltip;
         labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     }
     else
@@ -480,10 +486,10 @@ void BitcoinGUI::setNumBlocks(int count)
         labelBlocksIcon->setMovie(syncIconMovie);
         syncIconMovie->start();
     }
-
-    tooltip += QString("\n");
-    tooltip += tr("Last received block was generated %1.").arg(text);
-
+	
+    	tooltip += QString("\n");
+    	tooltip += tr("Last received block was generated %1.").arg(text);
+	
     labelBlocksIcon->setToolTip(tooltip);
     progressBarLabel->setToolTip(tooltip);
     progressBar->setToolTip(tooltip);
