@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
     // - Then load the more specific locale translator
     QString lang_territory = QLocale::system().name(); // "en_US"
     QString lang = lang_territory;
+    
     lang.truncate(lang_territory.lastIndexOf('_')); // "en"
     QTranslator qtTranslatorBase, qtTranslator, translatorBase, translator;
 
