@@ -12,7 +12,7 @@ class QUrl;
 QT_END_NAMESPACE
 class SendCoinsRecipient;
 
-/** Static utility functions used by the Bitcoin Qt UI.
+/** Static utility functions used by the Litecoin Qt UI.
  */
 class GUIUtil
 {
@@ -21,7 +21,7 @@ public:
     static QString dateTimeStr(qint64 nTime);
     static QString dateTimeStr(const QDateTime &datetime);
 
-    // Render bitcoin addresses in monospace font
+    // Render litecoin addresses in monospace font
     static QFont bitcoinAddressFont();
 
     // Set up widgets for address and amounts
@@ -29,7 +29,7 @@ public:
     static void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
     // Parse "litecoin:" URL into recipient object, return true on succesful parsing
-    // See Bitcoin URL definition discussion here: https://bitcointalk.org/index.php?topic=33490.0
+    // See Litecoin URL definition discussion here: https://bitcointalk.org/index.php?topic=33490.0
     static bool parseBitcoinURL(const QUrl *url, SendCoinsRecipient *out);
 };
 

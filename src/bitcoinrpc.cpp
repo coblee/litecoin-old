@@ -2023,7 +2023,7 @@ pair<string, rpcfn_type> pCallTable[] =
     make_pair("signmessage",           &signmessage),
     make_pair("verifymessage",         &verifymessage),
     make_pair("getwork",                &getwork),
-    make_pair("getworkex",                &getworkex),
+    make_pair("getworkex",              &getworkex),
     make_pair("listaccounts",           &listaccounts),
     make_pair("settxfee",               &settxfee),
     make_pair("setmininput",            &setmininput),
@@ -2055,7 +2055,7 @@ string pAllowInSafeMode[] =
     "walletlock",
     "validateaddress",
     "getwork",
-	"getworkex",
+    "getworkex",
     "getmemorypool",
 };
 set<string> setAllowInSafeMode(pAllowInSafeMode, pAllowInSafeMode + sizeof(pAllowInSafeMode)/sizeof(pAllowInSafeMode[0]));

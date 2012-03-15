@@ -20,6 +20,7 @@ Q_IMPORT_PLUGIN(qcncodecs)
 Q_IMPORT_PLUGIN(qjpcodecs)
 Q_IMPORT_PLUGIN(qtwcodecs)
 Q_IMPORT_PLUGIN(qkrcodecs)
+Q_IMPORT_PLUGIN(qtaccessiblewidgets)
 #endif
 
 using namespace std;
@@ -182,6 +183,7 @@ bool AppInit2(int argc, char* argv[])
             "  -gen             \t\t  " + _("Generate coins\n") +
             "  -gen=0           \t\t  " + _("Don't generate coins\n") +
             "  -min             \t\t  " + _("Start minimized\n") +
+            "  -splash          \t\t  " + _("Show splash screen on startup (default: 1)") + "\n" +
             "  -datadir=<dir>   \t\t  " + _("Specify data directory\n") +
             "  -timeout=<n>     \t  "   + _("Specify connection timeout (in milliseconds)\n") +
             "  -proxy=<ip:port> \t  "   + _("Connect through socks4 proxy\n") +

@@ -251,7 +251,7 @@ public:
     bool operator> (const CBase58Data& b58) const { return CompareTo(b58) >  0; }
 };
 
-// base58-encoded bitcoin addresses
+// base58-encoded litecoin addresses
 // Addresses have version 0 or 111 (testnet)
 // The data vector contains RIPEMD160(SHA256(pubkey)), where pubkey is the serialized public key
 class CBitcoinAddress : public CBase58Data
