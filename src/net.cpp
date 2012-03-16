@@ -1038,9 +1038,13 @@ void MapPort(bool /* unused fMapPort */)
 
 
 
+// DNS seeds
+// Each pair gives a source name and a seed name.
+// The first name is used as information source for addrman.
+// The second name should resolve to a list of seed addresses.
 static const char *strDNSSeed[][2] = {
-    "litecoin.org",
-    "litecoin.andykellett.com",
+    {"litecoin.org", "litecoin.org"},
+    {"litecoin.andykellett.com", "litecoin.andykellett.com"},
 };
 
 void ThreadDNSAddressSeed(void* parg)
