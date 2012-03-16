@@ -116,7 +116,7 @@ all: litecoind
 -include obj-test/*.P
 
 obj/scrypt.o: scrypt.c
-        gcc -c -o $@ $^
+	gcc -c -o $@ $^
 
 obj/%.o: %.cpp
 	$(CXX) -c $(xCXXFLAGS) -MMD -o $@ $<
