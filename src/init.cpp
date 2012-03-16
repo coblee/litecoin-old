@@ -249,10 +249,11 @@ bool AppInit2(int argc, char* argv[])
     }
 
     fTestNet = GetBoolArg("-testnet");
-    if (fTestNet)
-    {
+    // Litecoin: Keep irc seeding on by default for now.
+//    if (fTestNet)
+//    {
         SoftSetBoolArg("-irc", true);
-    }
+//    }
 
     fDebug = GetBoolArg("-debug");
 
