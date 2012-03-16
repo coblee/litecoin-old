@@ -2344,6 +2344,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             return error("message addr size() = %d", vAddr.size());
         }
 
+        // Litecoin: a temporary fix for the spam.
+        if (vAddr.size() == 499)
+        {
+            pfrom->Misbehaving(100);
+            return error("spammer sent addr size() = %d", vAddr.size());
+        }
+
         // Store the new addresses
         int64 nNow = GetAdjustedTime();
         int64 nSince = nNow - 10 * 60;
