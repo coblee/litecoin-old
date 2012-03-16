@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_BIGNUM_H
@@ -115,9 +115,9 @@ public:
     {
         unsigned long n = BN_get_word(this);
         if (!BN_is_negative(this))
-            return (n > INT_MAX ? INT_MAX : n);
+            return (n > std::numeric_limits<int>::max() ? std::numeric_limits<int>::max() : n);
         else
-            return (n > INT_MAX ? INT_MIN : -(int)n);
+            return (n > std::numeric_limits<int>::max() ? std::numeric_limits<int>::min() : -(int)n);
     }
 
     void setint64(int64 n)
@@ -243,7 +243,7 @@ public:
     std::vector<unsigned char> getvch() const
     {
         unsigned int nSize = BN_bn2mpi(this, NULL);
-        if (nSize < 4)
+        if (nSize <= 4)
             return std::vector<unsigned char>();
         std::vector<unsigned char> vch(nSize);
         BN_bn2mpi(this, &vch[0]);
@@ -338,19 +338,19 @@ public:
         return ToString(16);
     }
 
-    unsigned int GetSerializeSize(int nType=0, int nVersion=VERSION) const
+    unsigned int GetSerializeSize(int nType=0, int nVersion=PROTOCOL_VERSION) const
     {
         return ::GetSerializeSize(getvch(), nType, nVersion);
     }
 
     template<typename Stream>
-    void Serialize(Stream& s, int nType=0, int nVersion=VERSION) const
+    void Serialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION) const
     {
         ::Serialize(s, getvch(), nType, nVersion);
     }
 
     template<typename Stream>
-    void Unserialize(Stream& s, int nType=0, int nVersion=VERSION)
+    void Unserialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION)
     {
         std::vector<unsigned char> vch;
         ::Unserialize(s, vch, nType, nVersion);

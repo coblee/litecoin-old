@@ -59,9 +59,8 @@ void SendCoinsEntry::on_payTo_textChanged(const QString &address)
 {
     if(!model)
         return;
-
-    // Fill in label from address book, if no label is filled in yet 
-    if(ui->addAsLabel->text().isEmpty()) 
+    // Fill in label from address book, if no label is filled in yet
+    if(ui->addAsLabel->text().isEmpty())
         ui->addAsLabel->setText(model->getAddressTableModel()->labelForAddress(address));
 }
 
@@ -152,5 +151,10 @@ void SendCoinsEntry::setValue(const SendCoinsRecipient &value)
 bool SendCoinsEntry::isClear()
 {
     return ui->payTo->text().isEmpty();
+}
+
+void SendCoinsEntry::setFocus()
+{
+    ui->payTo->setFocus();
 }
 

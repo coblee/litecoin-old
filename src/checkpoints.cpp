@@ -1,4 +1,4 @@
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 
@@ -55,7 +55,6 @@ namespace Checkpoints
     {
         if (fTestNet) return NULL;
 
-        int64 nResult;
         BOOST_REVERSE_FOREACH(const MapCheckpoints::value_type& i, mapCheckpoints)
         {
             const uint256& hash = i.second;

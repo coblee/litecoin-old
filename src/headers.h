@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,7 +12,7 @@
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
 #endif
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0501
 #ifdef _WIN32_IE
 #undef _WIN32_IE
 #endif
@@ -21,9 +21,6 @@
 
 // Include boost/foreach here as it defines __STDC_LIMIT_MACROS on some systems.
 #include <boost/foreach.hpp>
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS // to enable UINT64_MAX from stdint.h
-#endif
 
 #if (defined(__unix__) || defined(unix)) && !defined(USG)
 #include <sys/param.h>  // to get BSD define
@@ -44,7 +41,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <limits.h>
 #include <float.h>
 #include <assert.h>
 #include <iostream>
@@ -82,8 +78,6 @@
 #include <netinet/in.h>
 #endif
 
-
-#pragma hdrstop
 
 #include "serialize.h"
 #include "uint256.h"

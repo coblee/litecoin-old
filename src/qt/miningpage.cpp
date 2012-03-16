@@ -51,8 +51,8 @@ void MiningPage::setModel(ClientModel *model)
     bool pool = model->getMiningType() == ClientModel::PoolMining;
     ui->threadsBox->setValue(model->getMiningThreads());
     ui->typeBox->setCurrentIndex(pool ? 1 : 0);
-    if (model->getMiningStarted())
-        startPressed();
+//    if (model->getMiningStarted())
+//        startPressed();
 }
 
 void MiningPage::startPressed()

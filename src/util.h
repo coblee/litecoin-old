@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_UTIL_H
@@ -24,20 +24,10 @@
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
 
+#include "netbase.h"
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-typedef __int64  int64;
-typedef unsigned __int64  uint64;
-#else
 typedef long long  int64;
 typedef unsigned long long  uint64;
-#endif
-#if defined(_MSC_VER) && _MSC_VER < 1300
-#define for  if (false) ; else for
-#endif
-#ifndef _MSC_VER
-#define __forceinline  inline
-#endif
 
 #define loop                for (;;)
 #define BEGIN(a)            ((char*)&(a))
@@ -53,7 +43,7 @@ typedef unsigned long long  uint64;
 #define snprintf my_snprintf
 
 #ifndef PRI64d
-#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MSVCRT__)
+#if defined(_MSC_VER) || defined(__MSVCRT__)
 #define PRI64d  "I64d"
 #define PRI64u  "I64u"
 #define PRI64x  "I64x"
@@ -84,30 +74,13 @@ T* alignup(T* p)
 #ifdef WIN32
 #define MSG_NOSIGNAL        0
 #define MSG_DONTWAIT        0
-#ifndef UINT64_MAX
-#define UINT64_MAX          _UI64_MAX
-#define INT64_MAX           _I64_MAX
-#define INT64_MIN           _I64_MIN
-#endif
+
 #ifndef S_IRUSR
 #define S_IRUSR             0400
 #define S_IWUSR             0200
 #endif
 #define unlink              _unlink
-typedef int socklen_t;
 #else
-#define WSAGetLastError()   errno
-#define WSAEINVAL           EINVAL
-#define WSAEALREADY         EALREADY
-#define WSAEWOULDBLOCK      EWOULDBLOCK
-#define WSAEMSGSIZE         EMSGSIZE
-#define WSAEINTR            EINTR
-#define WSAEINPROGRESS      EINPROGRESS
-#define WSAEADDRINUSE       EADDRINUSE
-#define WSAENOTSOCK         EBADF
-#define INVALID_SOCKET      (SOCKET)(~0)
-#define SOCKET_ERROR        -1
-typedef u_int SOCKET;
 #define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
 #define strlwr(psz)         to_lower(psz)
 #define _strlwr(psz)        to_lower(psz)
@@ -115,23 +88,12 @@ typedef u_int SOCKET;
 #define Beep(n1,n2)         (0)
 inline void Sleep(int64 n)
 {
-    boost::thread::sleep(boost::get_system_time() + boost::posix_time::milliseconds(n));
+    /*Boost has a year 2038 problem— if the request sleep time is past epoch+2^31 seconds the sleep returns instantly.
+      So we clamp our sleeps here to 10 years and hope that boost is fixed by 2028.*/
+    boost::thread::sleep(boost::get_system_time() + boost::posix_time::milliseconds(n>315576000000LL?315576000000LL:n));
 }
 #endif
 
-inline int myclosesocket(SOCKET& hSocket)
-{
-    if (hSocket == INVALID_SOCKET)
-        return WSAENOTSOCK;
-#ifdef WIN32
-    int ret = closesocket(hSocket);
-#else
-    int ret = close(hSocket);
-#endif
-    hSocket = INVALID_SOCKET;
-    return ret;
-}
-#define closesocket(s)      myclosesocket(s)
 #if !defined(QT_GUI)
 inline const char* _(const char* psz)
 {
@@ -178,12 +140,12 @@ bool ParseMoney(const std::string& str, int64& nRet);
 bool ParseMoney(const char* pszIn, int64& nRet);
 std::vector<unsigned char> ParseHex(const char* psz);
 std::vector<unsigned char> ParseHex(const std::string& str);
+bool IsHex(const std::string& str);
 std::vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid = NULL);
 std::string DecodeBase64(const std::string& str);
 std::string EncodeBase64(const unsigned char* pch, size_t len);
 std::string EncodeBase64(const std::string& str);
-void ParseParameters(int argc, char* argv[]);
-const char* wxGetTranslation(const char* psz);
+void ParseParameters(int argc, const char*const argv[]);
 bool WildcardMatch(const char* psz, const char* mask);
 bool WildcardMatch(const std::string& str, const std::string& mask);
 int GetFilesize(FILE* file);
@@ -191,7 +153,7 @@ void GetDataDir(char* pszDirRet);
 std::string GetConfigFile();
 std::string GetPidFile();
 void CreatePidFile(std::string pidFile, pid_t pid);
-void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet, std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet);
+bool ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet, std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet);
 #ifdef WIN32
 std::string MyGetSpecialFolderPath(int nFolder, bool fCreate);
 #endif
@@ -203,9 +165,9 @@ uint64 GetRand(uint64 nMax);
 int64 GetTime();
 void SetMockTime(int64 nMockTimeIn);
 int64 GetAdjustedTime();
-void AddTimeData(unsigned int ip, int64 nTime);
 std::string FormatFullVersion();
-
+std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments);
+void AddTimeData(const CNetAddr& ip, int64 nTime);
 
 
 
@@ -257,6 +219,12 @@ public:
 
 #define CRITICAL_BLOCK(cs)     \
     if (CCriticalBlock criticalblock = CCriticalBlock(cs, #cs, __FILE__, __LINE__))
+
+#define ENTER_CRITICAL_SECTION(cs) \
+    (cs).Enter(#cs, __FILE__, __LINE__)
+
+#define LEAVE_CRITICAL_SECTION(cs) \
+    (cs).Leave()
 
 class CTryCriticalBlock
 {
@@ -441,30 +409,50 @@ inline bool IsSwitchChar(char c)
 #endif
 }
 
-inline std::string GetArg(const std::string& strArg, const std::string& strDefault)
-{
-    if (mapArgs.count(strArg))
-        return mapArgs[strArg];
-    return strDefault;
-}
+/**
+ * Return string argument or default value
+ *
+ * @param strArg Argument to get (e.g. "-foo")
+ * @param default (e.g. "1")
+ * @return command-line argument or default value
+ */
+std::string GetArg(const std::string& strArg, const std::string& strDefault);
 
-inline int64 GetArg(const std::string& strArg, int64 nDefault)
-{
-    if (mapArgs.count(strArg))
-        return atoi64(mapArgs[strArg]);
-    return nDefault;
-}
+/**
+ * Return integer argument or default value
+ *
+ * @param strArg Argument to get (e.g. "-foo")
+ * @param default (e.g. 1)
+ * @return command-line argument (0 if invalid number) or default value
+ */
+int64 GetArg(const std::string& strArg, int64 nDefault);
 
-inline bool GetBoolArg(const std::string& strArg)
-{
-    if (mapArgs.count(strArg))
-    {
-        if (mapArgs[strArg].empty())
-            return true;
-        return (atoi(mapArgs[strArg]) != 0);
-    }
-    return false;
-}
+/**
+ * Return boolean argument or default value
+ *
+ * @param strArg Argument to get (e.g. "-foo")
+ * @param default (true or false)
+ * @return command-line argument or default value
+ */
+bool GetBoolArg(const std::string& strArg, bool fDefault=false);
+
+/**
+ * Set an argument if it doesn't already have a value
+ *
+ * @param strArg Argument to set (e.g. "-foo")
+ * @param strValue Value (e.g. "1")
+ * @return true if argument gets set, false if it already had a value
+ */
+bool SoftSetArg(const std::string& strArg, const std::string& strValue);
+
+/**
+ * Set a boolean argument if it doesn't already have a value
+ *
+ * @param strArg Argument to set (e.g. "-foo")
+ * @param fValue Value (e.g. false)
+ * @return true if argument gets set, false if it already had a value
+ */
+bool SoftSetBoolArg(const std::string& strArg, bool fValue);
 
 
 
@@ -473,16 +461,6 @@ inline bool GetBoolArg(const std::string& strArg)
 
 
 
-
-
-inline void heapchk()
-{
-#ifdef WIN32
-    /// for debugging
-    //if (_heapchk() != _HEAPOK)
-    //    DebugBreak();
-#endif
-}
 
 // Randomize the stack to help protect against buffer overrun exploits
 #define IMPLEMENT_RANDOMIZE_STACK(ThreadFn)     \
@@ -559,7 +537,7 @@ inline uint256 Hash(const T1 p1begin, const T1 p1end,
 }
 
 template<typename T>
-uint256 SerializeHash(const T& obj, int nType=SER_GETHASH, int nVersion=VERSION)
+uint256 SerializeHash(const T& obj, int nType=SER_GETHASH, int nVersion=PROTOCOL_VERSION)
 {
     // Most of the time is spent allocating and deallocating CDataStream's
     // buffer.  If this ever needs to be optimized further, make a CStaticStream
@@ -622,6 +600,16 @@ public:
         {
             return (vSorted[size/2-1] + vSorted[size/2]) / 2;
         }
+    }
+
+    int size() const
+    {
+        return vValues.size();
+    }
+
+    std::vector<T> sorted () const
+    {
+        return vSorted;
     }
 };
 
@@ -738,8 +726,9 @@ inline bool AffinityBugWorkaround(void(*pfn)(void*))
 
 inline uint32_t ByteReverse(uint32_t value)
 {
-	value = ((value & 0xFF00FF00) >> 8) | ((value & 0x00FF00FF) << 8);
-	return (value<<16) | (value>>16);
+    value = ((value & 0xFF00FF00) >> 8) | ((value & 0x00FF00FF) << 8);
+    return (value<<16) | (value>>16);
 }
 
 #endif
+

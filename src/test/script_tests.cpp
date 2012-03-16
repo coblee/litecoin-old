@@ -2,13 +2,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/foreach.hpp>
 
-#include "../main.h"
-#include "../wallet.h"
+#include "main.h"
+#include "wallet.h"
 
 using namespace std;
 extern uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
-extern bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const CTransaction& txTo, unsigned int nIn, int nHashType);
-extern bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsigned int nIn, int nHashType);
+extern bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const CTransaction& txTo, unsigned int nIn,
+                         bool fValidatePayToScriptHash, int nHashType);
 
 BOOST_AUTO_TEST_SUITE(script_tests)
 
@@ -72,9 +72,9 @@ sign_multisig(CScript scriptPubKey, CKey key, CTransaction transaction)
 BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG12)
 {
     CKey key1, key2, key3;
-    key1.MakeNewKey();
-    key2.MakeNewKey();
-    key3.MakeNewKey();
+    key1.MakeNewKey(true);
+    key2.MakeNewKey(false);
+    key3.MakeNewKey(true);
 
     CScript scriptPubKey12;
     scriptPubKey12 << OP_1 << key1.GetPubKey() << key2.GetPubKey() << OP_2 << OP_CHECKMULTISIG;
@@ -91,24 +91,24 @@ BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG12)
     txTo12.vout[0].nValue = 1;
 
     CScript goodsig1 = sign_multisig(scriptPubKey12, key1, txTo12);
-    BOOST_CHECK(VerifyScript(goodsig1, scriptPubKey12, txTo12, 0, 0));
+    BOOST_CHECK(VerifyScript(goodsig1, scriptPubKey12, txTo12, 0, true, 0));
     txTo12.vout[0].nValue = 2;
-    BOOST_CHECK(!VerifyScript(goodsig1, scriptPubKey12, txTo12, 0, 0));
+    BOOST_CHECK(!VerifyScript(goodsig1, scriptPubKey12, txTo12, 0, true, 0));
 
     CScript goodsig2 = sign_multisig(scriptPubKey12, key2, txTo12);
-    BOOST_CHECK(VerifyScript(goodsig2, scriptPubKey12, txTo12, 0, 0));
+    BOOST_CHECK(VerifyScript(goodsig2, scriptPubKey12, txTo12, 0, true, 0));
 
     CScript badsig1 = sign_multisig(scriptPubKey12, key3, txTo12);
-    BOOST_CHECK(!VerifyScript(badsig1, scriptPubKey12, txTo12, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig1, scriptPubKey12, txTo12, 0, true, 0));
 }
 
 BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG23)
 {
     CKey key1, key2, key3, key4;
-    key1.MakeNewKey();
-    key2.MakeNewKey();
-    key3.MakeNewKey();
-    key4.MakeNewKey();
+    key1.MakeNewKey(true);
+    key2.MakeNewKey(false);
+    key3.MakeNewKey(true);
+    key4.MakeNewKey(false);
 
     CScript scriptPubKey23;
     scriptPubKey23 << OP_2 << key1.GetPubKey() << key2.GetPubKey() << key3.GetPubKey() << OP_3 << OP_CHECKMULTISIG;
@@ -127,46 +127,46 @@ BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG23)
     std::vector<CKey> keys;
     keys.push_back(key1); keys.push_back(key2);
     CScript goodsig1 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(VerifyScript(goodsig1, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(VerifyScript(goodsig1, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key1); keys.push_back(key3);
     CScript goodsig2 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(VerifyScript(goodsig2, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(VerifyScript(goodsig2, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key2); keys.push_back(key3);
     CScript goodsig3 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(VerifyScript(goodsig3, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(VerifyScript(goodsig3, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key2); keys.push_back(key2); // Can't re-use sig
     CScript badsig1 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(!VerifyScript(badsig1, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig1, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key2); keys.push_back(key1); // sigs must be in correct order
     CScript badsig2 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(!VerifyScript(badsig2, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig2, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key3); keys.push_back(key2); // sigs must be in correct order
     CScript badsig3 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(!VerifyScript(badsig3, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig3, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key4); keys.push_back(key2); // sigs must match pubkeys
     CScript badsig4 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(!VerifyScript(badsig4, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig4, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear();
     keys.push_back(key1); keys.push_back(key4); // sigs must match pubkeys
     CScript badsig5 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(!VerifyScript(badsig5, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig5, scriptPubKey23, txTo23, 0, true, 0));
 
     keys.clear(); // Must have signatures
     CScript badsig6 = sign_multisig(scriptPubKey23, keys, txTo23);
-    BOOST_CHECK(!VerifyScript(badsig6, scriptPubKey23, txTo23, 0, 0));
+    BOOST_CHECK(!VerifyScript(badsig6, scriptPubKey23, txTo23, 0, true, 0));
 }    
 
 

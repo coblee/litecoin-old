@@ -20,8 +20,8 @@
       <string>This pane shows a detailed description of the transaction</string>
      </property>
      <property name="readOnly">
-      <bool>true</bool>	
-    </property>
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>

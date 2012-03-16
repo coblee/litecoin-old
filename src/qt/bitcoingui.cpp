@@ -1,12 +1,14 @@
 /*
  * Qt4 bitcoin GUI.
  *
- * W.J. van der Laan 2011
+ * W.J. van der Laan 20011-2012
+ * The Bitcoin Developers 20011-2012
  */
 #include "bitcoingui.h"
 #include "transactiontablemodel.h"
 #include "addressbookpage.h"
 #include "sendcoinsdialog.h"
+#include "messagepage.h"
 #include "optionsdialog.h"
 #include "aboutdialog.h"
 #include "clientmodel.h"
@@ -45,6 +47,8 @@
 #include <QStackedWidget>
 #include <QDateTime>
 #include <QMovie>
+#include <QFileDialog>
+#include <QDesktopServices>
 
 #include <QDragEnterEvent>
 #include <QUrl>
@@ -57,6 +61,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     walletModel(0),
     encryptWalletAction(0),
     changePassphraseAction(0),
+    aboutQtAction(0),
     trayIcon(0),
     notificator(0)
 {
@@ -100,6 +105,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     sendCoinsPage = new SendCoinsDialog(this);
 
+    messagePage = new MessagePage(this);
+
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(miningPage);
@@ -107,6 +114,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
+#ifdef FIRST_CLASS_MESSAGING
+    centralWidget->addWidget(messagePage);
+#endif
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -114,7 +124,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
-    //frameBlocks->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     frameBlocks->setContentsMargins(0,0,0,0);
     frameBlocks->setMinimumWidth(73);
     frameBlocks->setMaximumWidth(73);
@@ -159,6 +168,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
 BitcoinGUI::~BitcoinGUI()
 {
+    if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
+        trayIcon->hide();
 #ifdef Q_WS_MAC
     delete appMenuBar;
 #endif
@@ -203,12 +214,26 @@ void BitcoinGUI::createActions()
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(sendCoinsAction);
 
+    messageAction = new QAction(QIcon(":/icons/edit"), tr("Sign &message"), this);
+    messageAction->setToolTip(tr("Prove you control an address"));
+#ifdef FIRST_CLASS_MESSAGING
+    messageAction->setCheckable(true);
+#endif
+    tabGroup->addAction(messageAction);
+
+    connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
+    connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
+    connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
+    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
+    connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
+    connect(messageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(messageAction, SIGNAL(triggered()), this, SLOT(gotoMessagePage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -216,25 +241,32 @@ void BitcoinGUI::createActions()
     quitAction->setMenuRole(QAction::QuitRole);
     aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About %1").arg(qApp->applicationName()), this);
     aboutAction->setToolTip(tr("Show information about Litecoin"));
-    aboutAction->setMenuRole(QAction::AboutQtRole);
+    aboutAction->setMenuRole(QAction::AboutRole);
+    aboutQtAction = new QAction(tr("About &Qt"), this);
+    aboutQtAction->setToolTip(tr("Show information about Qt"));
+    aboutQtAction->setMenuRole(QAction::AboutQtRole);
     optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
     optionsAction->setToolTip(tr("Modify configuration options for Litecoin"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
     openBitcoinAction = new QAction(QIcon(":/icons/bitcoin"), tr("Open &Litecoin"), this);
     openBitcoinAction->setToolTip(tr("Show the Litecoin window"));
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
-    exportAction->setToolTip(tr("Export the current view to a file"));
+    exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet"), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
     encryptWalletAction->setCheckable(true);
+    backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet"), this);
+    backupWalletAction->setToolTip(tr("Backup wallet to another location"));
     changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase"), this);
     changePassphraseAction->setToolTip(tr("Change the passphrase used for wallet encryption"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
-    connect(openBitcoinAction, SIGNAL(triggered()), this, SLOT(showNormal()));
+    connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    connect(openBitcoinAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
+    connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
 }
 
@@ -250,6 +282,12 @@ void BitcoinGUI::createMenuBar()
 
     // Configure the menus
     QMenu *file = appMenuBar->addMenu(tr("&File"));
+    file->addAction(backupWalletAction);
+    file->addAction(exportAction);
+#ifndef FIRST_CLASS_MESSAGING
+    file->addAction(messageAction);
+#endif
+    file->addSeparator();
     file->addAction(quitAction);
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
@@ -260,6 +298,7 @@ void BitcoinGUI::createMenuBar()
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(aboutAction);
+    help->addAction(aboutQtAction);
 }
 
 void BitcoinGUI::createToolBars()
@@ -272,6 +311,9 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
     toolbar->addAction(miningAction);
+#ifdef FIRST_CLASS_MESSAGING
+    toolbar->addAction(messageAction);
+#endif
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -330,6 +372,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         miningPage->setModel(clientModel);
+        messagePage->setModel(walletModel);
 
         setEncryptionStatus(walletModel->getEncryptionStatus());
         connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
@@ -365,6 +408,10 @@ void BitcoinGUI::createTrayIcon()
     // Configuration of the tray icon (or dock icon) icon menu
     trayIconMenu->addAction(openBitcoinAction);
     trayIconMenu->addSeparator();
+    trayIconMenu->addAction(messageAction);
+#ifndef FIRST_CLASS_MESSAGING
+    trayIconMenu->addSeparator();
+#endif
     trayIconMenu->addAction(receiveCoinsAction);
     trayIconMenu->addAction(sendCoinsAction);
     trayIconMenu->addSeparator();
@@ -385,7 +432,6 @@ void BitcoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
         // Click on system tray icon triggers "open litecoin"
         openBitcoinAction->trigger();
     }
-
 }
 #endif
 
@@ -424,21 +470,36 @@ void BitcoinGUI::setNumBlocks(int count)
 {
     if(!clientModel)
         return;
-    int initTotal = clientModel->getNumBlocksAtStartup();
     int total = clientModel->getNumBlocksOfPeers();
     QString tooltip;
 
     if(count < total)
     {
-        progressBarLabel->setVisible(true);
-        progressBar->setVisible(true);
-        progressBar->setMaximum(total - initTotal);
-        progressBar->setValue(count - initTotal);
+        if (clientModel->getStatusBarWarnings() == "")
+        {
+            progressBarLabel->setVisible(true);
+            progressBarLabel->setText(tr("Synchronizing with network..."));
+            progressBar->setVisible(true);
+            progressBar->setMaximum(total);
+            progressBar->setValue(count);
+        }
+        else
+        {
+            progressBarLabel->setText(clientModel->getStatusBarWarnings());
+            progressBarLabel->setVisible(true);
+            progressBar->setVisible(false);
+        }
         tooltip = tr("Downloaded %1 of %2 blocks of transaction history.").arg(count).arg(total);
     }
     else
     {
-        progressBarLabel->setVisible(false);
+        if (clientModel->getStatusBarWarnings() == "")
+            progressBarLabel->setVisible(false);
+        else
+        {
+            progressBarLabel->setText(clientModel->getStatusBarWarnings());
+            progressBarLabel->setVisible(true);
+        }
         progressBar->setVisible(false);
         tooltip = tr("Downloaded %1 blocks of transaction history.").arg(count);
     }
@@ -451,7 +512,11 @@ void BitcoinGUI::setNumBlocks(int count)
     QString text;
 
     // Represent time from last generated block in human readable text
-    if(secs < 60)
+    if(secs <= 0)
+    {
+        // Fully up to date. Leave text empty.
+    }
+    else if(secs < 60)
     {
         text = tr("%n second(s) ago","",secs);
     }
@@ -471,7 +536,7 @@ void BitcoinGUI::setNumBlocks(int count)
     // Set icon state: spinning if catching up, tick otherwise
     if(secs < 30*60)
     {
-        tooltip = tr("Up to date") + QString("\n") + tooltip;
+        tooltip = tr("Up to date") + QString(".\n") + tooltip;
         labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     }
     else
@@ -481,8 +546,11 @@ void BitcoinGUI::setNumBlocks(int count)
         syncIconMovie->start();
     }
 
-    tooltip += QString("\n");
-    tooltip += tr("Last received block was generated %1.").arg(text);
+    if(!text.isEmpty())
+    {
+        tooltip += QString("\n");
+        tooltip += tr("Last received block was generated %1.").arg(text);
+    }
 
     labelBlocksIcon->setToolTip(tooltip);
     progressBarLabel->setToolTip(tooltip);
@@ -503,6 +571,19 @@ void BitcoinGUI::setMining(bool mining, int hashrate)
     }
 }
 
+void BitcoinGUI::refreshStatusBar()
+{
+    /* Might display multiple times in the case of multiple alerts
+    static QString prevStatusBar;
+    QString newStatusBar = clientModel->getStatusBarWarnings();
+    if (prevStatusBar != newStatusBar)
+    {
+        prevStatusBar = newStatusBar;
+        error(tr("Network Alert"), newStatusBar);
+    }*/
+    setNumBlocks(clientModel->getNumBlocks());
+}
+
 void BitcoinGUI::error(const QString &title, const QString &message)
 {
     // Report errors from network/worker thread
@@ -516,15 +597,19 @@ void BitcoinGUI::changeEvent(QEvent *e)
     {
         if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
         {
-            if(isMinimized())
+            QWindowStateChangeEvent *wsevt = static_cast<QWindowStateChangeEvent*>(e);
+            bool wasMinimized = wsevt->oldState() & Qt::WindowMinimized;
+            bool isMinimized = windowState() & Qt::WindowMinimized;
+            if(!wasMinimized && isMinimized)
             {
-                hide();
-                e->ignore();
+                // Minimized, hide the window from taskbar
+                setWindowFlags(windowFlags() | Qt::Tool);
+                return;
             }
-            else
+            else if(wasMinimized && !isMinimized)
             {
-                show();
-                e->accept();
+                // Unminimized, show the window in taskbar
+                setWindowFlags(windowFlags() &~ Qt::Tool);
             }
         }
     }
@@ -597,7 +682,6 @@ void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int 
 
 void BitcoinGUI::gotoOverviewPage()
 {
-    show();
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -616,7 +700,6 @@ void BitcoinGUI::gotoMiningPage()
 
 void BitcoinGUI::gotoHistoryPage()
 {
-    show();
     historyAction->setChecked(true);
     centralWidget->setCurrentWidget(transactionsPage);
 
@@ -627,7 +710,6 @@ void BitcoinGUI::gotoHistoryPage()
 
 void BitcoinGUI::gotoAddressBookPage()
 {
-    show();
     addressBookAction->setChecked(true);
     centralWidget->setCurrentWidget(addressBookPage);
 
@@ -638,7 +720,6 @@ void BitcoinGUI::gotoAddressBookPage()
 
 void BitcoinGUI::gotoReceiveCoinsPage()
 {
-    show();
     receiveCoinsAction->setChecked(true);
     centralWidget->setCurrentWidget(receiveCoinsPage);
 
@@ -649,12 +730,31 @@ void BitcoinGUI::gotoReceiveCoinsPage()
 
 void BitcoinGUI::gotoSendCoinsPage()
 {
-    show();
     sendCoinsAction->setChecked(true);
     centralWidget->setCurrentWidget(sendCoinsPage);
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoMessagePage()
+{
+#ifdef FIRST_CLASS_MESSAGING
+    messageAction->setChecked(true);
+    centralWidget->setCurrentWidget(messagePage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+#else
+    messagePage->show();
+    messagePage->setFocus();
+#endif
+}
+
+void BitcoinGUI::gotoMessagePage(QString addr)
+{
+    gotoMessagePage();
+    messagePage->setAddress(addr);
 }
 
 void BitcoinGUI::dragEnterEvent(QDragEnterEvent *event)
@@ -672,11 +772,17 @@ void BitcoinGUI::dropEvent(QDropEvent *event)
         QList<QUrl> urls = event->mimeData()->urls();
         foreach(const QUrl &url, urls)
         {
-            sendCoinsPage->handleURL(&url);
+            sendCoinsPage->handleURL(url.toString());
         }
     }
 
     event->acceptProposedAction();
+}
+
+void BitcoinGUI::handleURL(QString strURL)
+{
+    gotoSendCoinsPage();
+    sendCoinsPage->handleURL(strURL);
 }
 
 void BitcoinGUI::setEncryptionStatus(int status)
@@ -720,6 +826,17 @@ void BitcoinGUI::encryptWallet(bool status)
     setEncryptionStatus(walletModel->getEncryptionStatus());
 }
 
+void BitcoinGUI::backupWallet()
+{
+    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+    QString filename = QFileDialog::getSaveFileName(this, tr("Backup Wallet"), saveDir, tr("Wallet Data (*.dat)"));
+    if(!filename.isEmpty()) {
+        if(!walletModel->backupWallet(filename)) {
+            QMessageBox::warning(this, tr("Backup Failed"), tr("There was an error trying to save the wallet data to the new location."));
+        }
+    }
+}
+
 void BitcoinGUI::changePassphrase()
 {
     AskPassphraseDialog dlg(AskPassphraseDialog::ChangePass, this);
@@ -738,4 +855,12 @@ void BitcoinGUI::unlockWallet()
         dlg.setModel(walletModel);
         dlg.exec();
     }
+}
+
+void BitcoinGUI::showNormalIfMinimized()
+{
+    if(!isVisible()) // Show, if hidden
+        show();
+    if(isMinimized()) // Unminimize, if minimized
+        showNormal();
 }

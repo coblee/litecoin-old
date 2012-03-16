@@ -6,8 +6,8 @@ USE_UPNP:=0
 
 DEFS=-DNOPCH
 
-DEFS += $(addprefix -I,$(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
-LIBS += $(addprefix -l,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
+DEFS += $(addprefix -I,$(CURDIR) $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
+LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
 
 LMODE = dynamic
 LMODE2 = dynamic
@@ -16,10 +16,12 @@ ifdef STATIC
 	ifeq (${STATIC}, all)
 		LMODE2 = static
 	endif
+else
+	TESTDEFS += -DBOOST_TEST_DYN_LINK
 endif
 
 # for boost 1.37, add -mt to the boost libraries
-LIBS= \
+LIBS += \
  -Wl,-B$(LMODE) \
    -l boost_system$(BOOST_LIB_SUFFIX) \
    -l boost_filesystem$(BOOST_LIB_SUFFIX) \
@@ -83,34 +85,14 @@ LIBS+= \
 
 DEBUGFLAGS=-g
 CXXFLAGS=-O2
-xCXXFLAGS=-pthread -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
-HEADERS = \
-    base58.h \
-    bignum.h \
-    checkpoints.h \
-    crypter.h \
-    db.h \
-    headers.h \
-    init.h \
-    irc.h \
-    key.h \
-    keystore.h \
-    main.h \
-    net.h \
-    noui.h \
-    protocol.h \
-    bitcoinrpc.h \
-    script.h \
-    scrypt.h \
-    serialize.h \
-    strlcpy.h \
-    uint256.h \
-    util.h \
-    wallet.h
+xCXXFLAGS=-pthread -Wextra -Wno-sign-compare -Wno-char-subscripts -Wno-invalid-offsetof -Wformat-security \
+    $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 
 OBJS= \
     obj/checkpoints.o \
+    obj/netbase.o \
     obj/crypter.o \
+    obj/key.o \
     obj/db.o \
     obj/init.o \
     obj/irc.o \
@@ -119,6 +101,7 @@ OBJS= \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \
+    obj/rpcdump.o \
     obj/script.o \
     obj/scrypt.o \
     obj/util.o \
@@ -128,40 +111,37 @@ OBJS= \
 all: litecoind
 
 # auto-generated dependencies:
--include obj/nogui/*.P
--include obj/test/*.P
+-include obj/*.P
+-include obj-test/*.P
 
-obj/nogui/scrypt.o: scrypt.c
-	gcc -c -o $@ $^
+obj/scrypt.o: scrypt.c
+        gcc -c -o $@ $^
 
-obj/nogui/scrypt.o: scrypt.c
-	gcc -c -o $@ $^
-
-obj/nogui/%.o: %.cpp
+obj/%.o: %.cpp
 	$(CXX) -c $(xCXXFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
 
-litecoind: $(OBJS:obj/%=obj/nogui/%)
+litecoind: $(OBJS:obj/%=obj/%)
 	$(CXX) $(xCXXFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-obj/test/%.o: test/%.cpp
-	$(CXX) -c $(xCXXFLAGS) -MMD -o $@ $<
+TESTOBJS := $(patsubst test/%.cpp,obj-test/%.o,$(wildcard test/*.cpp))
+
+obj-test/%.o: test/%.cpp
+	$(CXX) -c $(TESTDEFS) $(xCXXFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
 
-test_bitcoin: obj/test/test_bitcoin.o $(filter-out obj/nogui/init.o,$(OBJS:obj/%=obj/nogui/%))
-	$(CXX) $(xCXXFLAGS) -o $@ $(LIBPATHS) $^ -Wl,-Bstatic -lboost_unit_test_framework $(LDFLAGS) $(LIBS)
+test_bitcoin: $(TESTOBJS) $(filter-out obj/init.o,$(OBJS:obj/%=obj/%))
+	$(CXX) $(xCXXFLAGS) -o $@ $(LIBPATHS) $^ -Wl,-B$(LMODE) -lboost_unit_test_framework $(LDFLAGS) $(LIBS)
 
 clean:
 	-rm -f litecoind test_bitcoin
 	-rm -f obj/*.o
-	-rm -f obj/nogui/*.o
-	-rm -f obj/test/*.o
+	-rm -f obj-test/*.o
 	-rm -f obj/*.P
-	-rm -f obj/nogui/*.P
-	-rm -f obj/test/*.P
+	-rm -f obj-test/*.P

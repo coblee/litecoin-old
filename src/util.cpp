@@ -1,9 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #include "headers.h"
 #include "strlcpy.h"
+#include <boost/algorithm/string/join.hpp>
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
@@ -30,7 +31,7 @@ string strMiscWarning;
 bool fTestNet = false;
 bool fNoListen = false;
 bool fLogTimestamps = false;
-
+CMedianFilter<int64> vTimeOffsets(200,0);
 
 
 
@@ -132,7 +133,7 @@ uint64 GetRand(uint64 nMax)
 
     // The range of the random source must be a multiple of the modulus
     // to give every possible output value an equal possibility
-    uint64 nRange = (UINT64_MAX / nMax) * nMax;
+    uint64 nRange = (std::numeric_limits<uint64>::max() / nMax) * nMax;
     uint64 nRand = 0;
     do
         RAND_bytes((unsigned char*)&nRand, sizeof(nRand));
@@ -399,26 +400,36 @@ bool ParseMoney(const char* pszIn, int64& nRet)
 }
 
 
+static char phexdigit[256] =
+{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  0,1,2,3,4,5,6,7,8,9,-1,-1,-1,-1,-1,-1,
+  -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, };
+
+bool IsHex(const string& str)
+{
+    BOOST_FOREACH(unsigned char c, str)
+    {
+        if (phexdigit[c] < 0)
+            return false;
+    }
+    return (str.size() > 0) && (str.size()%2 == 0);
+}
+
 vector<unsigned char> ParseHex(const char* psz)
 {
-    static char phexdigit[256] =
-    { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      0,1,2,3,4,5,6,7,8,9,-1,-1,-1,-1,-1,-1,
-      -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, };
-
     // convert hex dump to vector
     vector<unsigned char> vch;
     loop
@@ -443,7 +454,22 @@ vector<unsigned char> ParseHex(const string& str)
     return ParseHex(str.c_str());
 }
 
-void ParseParameters(int argc, char* argv[])
+static void InterpretNegativeSetting(string name, map<string, string>& mapSettingsRet)
+{
+    // interpret -nofoo as -foo=0 (and -nofoo=0 as -foo=1) as long as -foo not set
+    if (name.find("-no") == 0)
+    {
+        std::string positive("-");
+        positive.append(name.begin()+3, name.end());
+        if (mapSettingsRet.count(positive) == 0)
+        {
+            bool value = !GetBoolArg(name);
+            mapSettingsRet[positive] = (value ? "1" : "0");
+        }
+    }
+}
+
+void ParseParameters(int argc, const char*const argv[])
 {
     mapArgs.clear();
     mapMultiArgs.clear();
@@ -464,10 +490,71 @@ void ParseParameters(int argc, char* argv[])
         #endif
         if (psz[0] != '-')
             break;
+
         mapArgs[psz] = pszValue;
         mapMultiArgs[psz].push_back(pszValue);
     }
+
+    // New 0.6 features:
+    BOOST_FOREACH(const PAIRTYPE(string,string)& entry, mapArgs)
+    {
+        string name = entry.first;
+
+        //  interpret --foo as -foo (as long as both are not set)
+        if (name.find("--") == 0)
+        {
+            std::string singleDash(name.begin()+1, name.end());
+            if (mapArgs.count(singleDash) == 0)
+                mapArgs[singleDash] = entry.second;
+            name = singleDash;
+        }
+
+        // interpret -nofoo as -foo=0 (and -nofoo=0 as -foo=1) as long as -foo not set
+        InterpretNegativeSetting(name, mapArgs);
+    }
 }
+
+std::string GetArg(const std::string& strArg, const std::string& strDefault)
+{
+    if (mapArgs.count(strArg))
+        return mapArgs[strArg];
+    return strDefault;
+}
+
+int64 GetArg(const std::string& strArg, int64 nDefault)
+{
+    if (mapArgs.count(strArg))
+        return atoi64(mapArgs[strArg]);
+    return nDefault;
+}
+
+bool GetBoolArg(const std::string& strArg, bool fDefault)
+{
+    if (mapArgs.count(strArg))
+    {
+        if (mapArgs[strArg].empty())
+            return true;
+        return (atoi(mapArgs[strArg]) != 0);
+    }
+    return fDefault;
+}
+
+bool SoftSetArg(const std::string& strArg, const std::string& strValue)
+{
+    if (mapArgs.count(strArg))
+        return false;
+    mapArgs[strArg] = strValue;
+    return true;
+}
+
+bool SoftSetBoolArg(const std::string& strArg, bool fValue)
+{
+    if (fValue)
+        return SoftSetArg(strArg, std::string("1"));
+    else
+        return SoftSetArg(strArg, std::string("0"));
+}
+
 
 string EncodeBase64(const unsigned char* pch, size_t len)
 {
@@ -700,46 +787,23 @@ void PrintExceptionContinue(std::exception* pex, const char* pszThread)
     strMiscWarning = pszMessage;
 }
 
-
-
-
-
-
-
-
 #ifdef WIN32
-typedef WINSHELLAPI BOOL (WINAPI *PSHGETSPECIALFOLDERPATHA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
-
 string MyGetSpecialFolderPath(int nFolder, bool fCreate)
 {
-    char pszPath[MAX_PATH+100] = "";
-
-    // SHGetSpecialFolderPath isn't always available on old Windows versions
-    HMODULE hShell32 = LoadLibraryA("shell32.dll");
-    if (hShell32)
+    char pszPath[MAX_PATH] = "";
+    if(SHGetSpecialFolderPathA(NULL, pszPath, nFolder, fCreate))
     {
-        PSHGETSPECIALFOLDERPATHA pSHGetSpecialFolderPath =
-            (PSHGETSPECIALFOLDERPATHA)GetProcAddress(hShell32, "SHGetSpecialFolderPathA");
-        if (pSHGetSpecialFolderPath)
-            (*pSHGetSpecialFolderPath)(NULL, pszPath, nFolder, fCreate);
-        FreeModule(hShell32);
+        return pszPath;
     }
-
-    // Backup option
-    if (pszPath[0] == '\0')
+    else if (nFolder == CSIDL_STARTUP)
     {
-        if (nFolder == CSIDL_STARTUP)
-        {
-            strcpy(pszPath, getenv("USERPROFILE"));
-            strcat(pszPath, "\\Start Menu\\Programs\\Startup");
-        }
-        else if (nFolder == CSIDL_APPDATA)
-        {
-            strcpy(pszPath, getenv("APPDATA"));
-        }
+        return string(getenv("USERPROFILE")) + "\\Start Menu\\Programs\\Startup";
     }
-
-    return pszPath;
+    else if (nFolder == CSIDL_APPDATA)
+    {
+        return getenv("APPDATA");
+    }
+    return "";
 }
 #endif
 
@@ -821,15 +885,28 @@ string GetConfigFile()
     return pathConfig.string();
 }
 
-void ReadConfigFile(map<string, string>& mapSettingsRet,
+bool ReadConfigFile(map<string, string>& mapSettingsRet,
                     map<string, vector<string> >& mapMultiSettingsRet)
 {
     namespace fs = boost::filesystem;
     namespace pod = boost::program_options::detail;
 
+    if (mapSettingsRet.count("-datadir"))
+    {
+        if (fs::is_directory(fs::system_complete(mapSettingsRet["-datadir"])))
+        {
+            fs::path pathDataDir = fs::system_complete(mapSettingsRet["-datadir"]);
+            strlcpy(pszSetDataDir, pathDataDir.string().c_str(), sizeof(pszSetDataDir));
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     fs::ifstream streamConfig(GetConfigFile());
     if (!streamConfig.good())
-        return;
+        return true; // No bitcoin.conf file is OK
 
     set<string> setOptions;
     setOptions.insert("*");
@@ -839,9 +916,14 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
         // Don't overwrite existing settings so command line settings override litecoin.conf
         string strKey = string("-") + it->string_key;
         if (mapSettingsRet.count(strKey) == 0)
+        {
             mapSettingsRet[strKey] = it->value[0];
+            //  interpret nofoo=1 as foo=0 (and nofoo=0 as foo=1) as long as foo not set)
+            InterpretNegativeSetting(strKey, mapSettingsRet);
+        }
         mapMultiSettingsRet[strKey].push_back(it->value[0]);
     }
+    return true;
 }
 
 string GetPidFile()
@@ -930,25 +1012,22 @@ int64 GetAdjustedTime()
     return GetTime() + nTimeOffset;
 }
 
-void AddTimeData(unsigned int ip, int64 nTime)
+void AddTimeData(const CNetAddr& ip, int64 nTime)
 {
     int64 nOffsetSample = nTime - GetTime();
 
     // Ignore duplicates
-    static set<unsigned int> setKnown;
+    static set<CNetAddr> setKnown;
     if (!setKnown.insert(ip).second)
         return;
 
     // Add data
-    static vector<int64> vTimeOffsets;
-    if (vTimeOffsets.empty())
-        vTimeOffsets.push_back(0);
-    vTimeOffsets.push_back(nOffsetSample);
-    printf("Added time data, samples %d, offset %+"PRI64d" (%+"PRI64d" minutes)\n", vTimeOffsets.size(), vTimeOffsets.back(), vTimeOffsets.back()/60);
+    vTimeOffsets.input(nOffsetSample);
+    printf("Added time data, samples %d, offset %+"PRI64d" (%+"PRI64d" minutes)\n", vTimeOffsets.size(), nOffsetSample, nOffsetSample/60);
     if (vTimeOffsets.size() >= 5 && vTimeOffsets.size() % 2 == 1)
     {
-        sort(vTimeOffsets.begin(), vTimeOffsets.end());
-        int64 nMedian = vTimeOffsets[vTimeOffsets.size()/2];
+        int64 nMedian = vTimeOffsets.median();
+        std::vector<int64> vSorted = vTimeOffsets.sorted();
         // Only let other nodes change our time by so much
         if (abs64(nMedian) < 35 * 60) // Litecoin: changed maximum adjust to 35 mins to avoid letting peers change our time too much in case of an attack.
         {
@@ -963,7 +1042,7 @@ void AddTimeData(unsigned int ip, int64 nTime)
             {
                 // If nobody has a time different than ours but within 5 minutes of ours, give a warning
                 bool fMatch = false;
-                BOOST_FOREACH(int64 nOffset, vTimeOffsets)
+                BOOST_FOREACH(int64 nOffset, vSorted)
                     if (nOffset != 0 && abs64(nOffset) < 5 * 60)
                         fMatch = true;
 
@@ -977,12 +1056,14 @@ void AddTimeData(unsigned int ip, int64 nTime)
                 }
             }
         }
-        BOOST_FOREACH(int64 n, vTimeOffsets)
-            printf("%+"PRI64d"  ", n);
-        printf("|  nTimeOffset = %+"PRI64d"  (%+"PRI64d" minutes)\n", nTimeOffset, nTimeOffset/60);
+        if (fDebug) {
+            BOOST_FOREACH(int64 n, vSorted)
+                printf("%+"PRI64d"  ", n);
+            printf("|  ");
+        }
+        printf("nTimeOffset = %+"PRI64d"  (%+"PRI64d" minutes)\n", nTimeOffset, nTimeOffset/60);
     }
 }
-
 
 
 
@@ -1001,7 +1082,7 @@ string FormatVersion(int nVersion)
 
 string FormatFullVersion()
 {
-    string s = FormatVersion(VERSION) + pszSubVer;
+    string s = FormatVersion(CLIENT_VERSION);
     if (VERSION_IS_BETA) {
         s += "-";
         s += _("beta");
@@ -1009,6 +1090,17 @@ string FormatFullVersion()
     return s;
 }
 
+// Format the subversion field according to BIP 14 spec (https://en.bitcoin.it/wiki/BIP_0014)
+std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments)
+{
+    std::ostringstream ss;
+    ss << "/";
+    ss << name << ":" << FormatVersion(nClientVersion);
+    if (!comments.empty())
+        ss << "(" << boost::algorithm::join(comments, "; ") << ")";
+    ss << "/";
+    return ss.str();
+}
 
 
 
@@ -1115,7 +1207,18 @@ static void pop_lock()
 void CCriticalSection::Enter(const char* pszName, const char* pszFile, int nLine)
 {
     push_lock(this, CLockLocation(pszName, pszFile, nLine));
+#ifdef DEBUG_LOCKCONTENTION
+    bool result = mutex.try_lock();
+    if (!result)
+    {
+        printf("LOCKCONTENTION: %s\n", pszName);
+        printf("Locker: %s:%d\n", pszFile, nLine);
+        mutex.lock();
+        printf("Locked\n");
+    }
+#else
     mutex.lock();
+#endif
 }
 void CCriticalSection::Leave()
 {
@@ -1132,9 +1235,19 @@ bool CCriticalSection::TryEnter(const char* pszName, const char* pszFile, int nL
 
 #else
 
-void CCriticalSection::Enter(const char*, const char*, int)
+void CCriticalSection::Enter(const char* pszName, const char* pszFile, int nLine)
 {
+#ifdef DEBUG_LOCKCONTENTION
+    bool result = mutex.try_lock();
+    if (!result)
+    {
+        printf("LOCKCONTENTION: %s\n", pszName);
+        printf("Locker: %s:%d\n", pszFile, nLine);
+        mutex.lock();
+    }
+#else
     mutex.lock();
+#endif
 }
 
 void CCriticalSection::Leave()
@@ -1149,3 +1262,4 @@ bool CCriticalSection::TryEnter(const char*, const char*, int)
 }
 
 #endif /* DEBUG_LOCKORDER */
+

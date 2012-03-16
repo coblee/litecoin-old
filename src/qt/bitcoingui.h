@@ -12,6 +12,7 @@ class OverviewPage;
 class MiningPage;
 class AddressBookPage;
 class SendCoinsDialog;
+class MessagePage;
 class Notificator;
 
 QT_BEGIN_NAMESPACE
@@ -64,6 +65,7 @@ private:
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
+    MessagePage *messagePage;
 
     QLabel *labelEncryptionIcon;
     QLabel *labelMiningIcon;
@@ -79,13 +81,16 @@ private:
     QAction *quitAction;
     QAction *sendCoinsAction;
     QAction *addressBookAction;
+    QAction *messageAction;
     QAction *aboutAction;
     QAction *receiveCoinsAction;
     QAction *optionsAction;
     QAction *openBitcoinAction;
     QAction *exportAction;
     QAction *encryptWalletAction;
+    QAction *backupWalletAction;
     QAction *changePassphraseAction;
+    QAction *aboutQtAction;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
@@ -114,6 +119,8 @@ public slots:
        @see WalletModel::EncryptionStatus
     */
     void setEncryptionStatus(int status);
+    /** Set the status bar text if there are any warnings (removes sync progress bar if applicable) */
+    void refreshStatusBar();
 
     /** Notify the user of an error in the network or transaction handling code. */
     void error(const QString &title, const QString &message);
@@ -126,6 +133,10 @@ public slots:
       @param[out] payFee            true to pay the fee, false to not pay the fee
     */
     void askFee(qint64 nFeeRequired, bool *payFee);
+    void handleURL(QString strURL);
+
+    void gotoMessagePage();
+    void gotoMessagePage(QString);
 
 private slots:
     /** Switch to overview (home) page */
@@ -156,10 +167,15 @@ private slots:
     void incomingTransaction(const QModelIndex & parent, int start, int end);
     /** Encrypt the wallet */
     void encryptWallet(bool status);
+    /** Backup the wallet */
+    void backupWallet();
     /** Change encrypted wallet passphrase */
     void changePassphrase();
     /** Ask for pass phrase to unlock wallet temporarily */
     void unlockWallet();
+
+    /** Show window if hidden, unminimize when minimized */
+    void showNormalIfMinimized();
 };
 
 #endif

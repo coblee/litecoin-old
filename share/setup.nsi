@@ -5,7 +5,7 @@ SetCompressor /SOLID lzma
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 0.5.1
+!define VERSION 0.6.0
 !define COMPANY "Bitcoin project"
 !define URL http://www.bitcoin.org/
 
@@ -45,13 +45,13 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-OutFile bitcoin-0.5.1-win32-setup.exe
+OutFile bitcoin-0.6.0-win32-setup.exe
 InstallDir $PROGRAMFILES\Bitcoin
 CRCCheck on
 XPStyle on
 BrandingText " "
 ShowInstDetails show
-VIProductVersion 0.5.1.0
+VIProductVersion 0.6.0.0
 VIAddVersionKey ProductName Bitcoin
 VIAddVersionKey ProductVersion "${VERSION}"
 VIAddVersionKey CompanyName "${COMPANY}"
@@ -94,6 +94,10 @@ Section -post SEC0001
     WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" UninstallString $INSTDIR\uninstall.exe
     WriteRegDWORD HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoModify 1
     WriteRegDWORD HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoRepair 1
+    WriteRegStr HKCR "bitcoin" "URL Protocol" ""
+    WriteRegStr HKCR "bitcoin" "" "URL:Bitcoin"
+    WriteRegStr HKCR "bitcoin\DefaultIcon" "" $INSTDIR\bitcoin.exe
+    WriteRegStr HKCR "bitcoin\shell\open\command" "" '"$INSTDIR\bitcoin.exe" "$$1"'
 SectionEnd
 
 # Macro for selecting uninstaller sections
@@ -131,6 +135,7 @@ Section -un.post UNSEC0001
     DeleteRegValue HKCU "${REGKEY}" Path
     DeleteRegKey /IfEmpty HKCU "${REGKEY}\Components"
     DeleteRegKey /IfEmpty HKCU "${REGKEY}"
+    DeleteRegKey HKCR "bitcoin"
     RmDir /REBOOTOK $SMPROGRAMS\$StartMenuGroup
     RmDir /REBOOTOK $INSTDIR
     Push $R0

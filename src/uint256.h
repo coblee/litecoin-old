@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_UINT256_H
@@ -11,16 +11,8 @@
 #include <string>
 #include <vector>
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-typedef __int64  int64;
-typedef unsigned __int64  uint64;
-#else
 typedef long long  int64;
 typedef unsigned long long  uint64;
-#endif
-#if defined(_MSC_VER) && _MSC_VER < 1300
-#define for  if (false) ; else for
-#endif
 
 
 inline int Testuint256AdHoc(std::vector<std::string> vArg);
@@ -97,13 +89,6 @@ public:
     {
         pn[0] ^= (unsigned int)b;
         pn[1] ^= (unsigned int)(b >> 32);
-        return *this;
-    }
-
-    base_uint& operator&=(uint64 b)
-    {
-        pn[0] &= (unsigned int)b;
-        pn[1] &= (unsigned int)(b >> 32);
         return *this;
     }
 
@@ -364,19 +349,19 @@ public:
     }
 
 
-    unsigned int GetSerializeSize(int nType=0, int nVersion=VERSION) const
+    unsigned int GetSerializeSize(int nType=0, int nVersion=PROTOCOL_VERSION) const
     {
         return sizeof(pn);
     }
 
     template<typename Stream>
-    void Serialize(Stream& s, int nType=0, int nVersion=VERSION) const
+    void Serialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION) const
     {
         s.write((char*)pn, sizeof(pn));
     }
 
     template<typename Stream>
-    void Unserialize(Stream& s, int nType=0, int nVersion=VERSION)
+    void Unserialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION)
     {
         s.read((char*)pn, sizeof(pn));
     }
@@ -631,7 +616,7 @@ inline const uint256 operator-(const uint256& a, const uint256& b)      { return
 
 
 
-
+#ifdef TEST_UINT256
 
 inline int Testuint256AdHoc(std::vector<std::string> vArg)
 {
@@ -762,5 +747,7 @@ inline int Testuint256AdHoc(std::vector<std::string> vArg)
 
     return (0);
 }
+
+#endif
 
 #endif

@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_MAIN_H
@@ -26,11 +26,15 @@ class CAddress;
 class CInv;
 class CRequestTracker;
 class CNode;
-class CBlockIndex;
+
+static const int CLIENT_VERSION = 60003;
+static const bool VERSION_IS_BETA = true;
+extern const std::string CLIENT_NAME;
 
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 static const int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
+static const int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
 static const int64 COIN = 100000000;
 static const int64 CENT = 1000000;
 static const int64 MIN_TX_FEE = 10000000; // Litecoin: minimum transaction fee of 0.1 LTC
@@ -47,6 +51,9 @@ static const int fHaveUPnP = false;
 #endif
 
 
+extern CScript COINBASE_FLAGS;
+
+
 
 
 
@@ -60,7 +67,11 @@ extern CBigNum bnBestChainWork;
 extern CBigNum bnBestInvalidWork;
 extern uint256 hashBestChain;
 extern CBlockIndex* pindexBest;
+extern uint64 nPooledTx;
 extern unsigned int nTransactionsUpdated;
+extern uint64 nLastBlockTx;
+extern uint64 nLastBlockSize;
+extern const std::string strMessageMagic;
 extern double dHashesPerSec;
 extern int64 nHPSTimerStart;
 extern int64 nTimeBestReceived;
@@ -68,14 +79,10 @@ extern CCriticalSection cs_setpwalletRegistered;
 extern std::set<CWallet*> setpwalletRegistered;
 
 // Settings
-extern int fGenerateBitcoins;
 extern int64 nTransactionFee;
 extern int64 nMinimumInputValue;
-extern int fLimitProcessors;
-extern int nLimitProcessors;
 extern int fMinimizeToTray;
 extern int fMinimizeOnClose;
-extern int fUseUPnP;
 
 
 
@@ -118,20 +125,6 @@ std::string GetWarnings(std::string strFor);
 
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
-
-template<typename T>
-bool WriteSetting(const std::string& strKey, const T& value)
-{
-    bool fOk = false;
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
-    {
-        std::string strWalletFile;
-        if (!GetWalletFile(pwallet, strWalletFile))
-            continue;
-        fOk |= CWalletDB(strWalletFile).WriteSetting(strKey, value);
-    }
-    return fOk;
-}
 
 
 class CDiskTxPos
@@ -256,17 +249,17 @@ public:
 
     CTxIn()
     {
-        nSequence = UINT_MAX;
+        nSequence = std::numeric_limits<unsigned int>::max();
     }
 
-    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=UINT_MAX)
+    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=std::numeric_limits<unsigned int>::max())
     {
         prevout = prevoutIn;
         scriptSig = scriptSigIn;
         nSequence = nSequenceIn;
     }
 
-    CTxIn(uint256 hashPrevTx, unsigned int nOut, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=UINT_MAX)
+    CTxIn(uint256 hashPrevTx, unsigned int nOut, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=std::numeric_limits<unsigned int>::max())
     {
         prevout = COutPoint(hashPrevTx, nOut);
         scriptSig = scriptSigIn;
@@ -282,7 +275,7 @@ public:
 
     bool IsFinal() const
     {
-        return (nSequence == UINT_MAX);
+        return (nSequence == std::numeric_limits<unsigned int>::max());
     }
 
     friend bool operator==(const CTxIn& a, const CTxIn& b)
@@ -306,7 +299,7 @@ public:
             str += strprintf(", coinbase %s", HexStr(scriptSig).c_str());
         else
             str += strprintf(", scriptSig=%s", scriptSig.ToString().substr(0,24).c_str());
-        if (nSequence != UINT_MAX)
+        if (nSequence != std::numeric_limits<unsigned int>::max())
             str += strprintf(", nSequence=%u", nSequence);
         str += ")";
         return str;
@@ -391,6 +384,15 @@ public:
 
 
 
+enum GetMinFee_mode
+{
+    GMF_BLOCK,
+    GMF_RELAY,
+    GMF_SEND,
+};
+
+typedef std::map<uint256, std::pair<CTxIndex, CTransaction> > MapPrevTx;
+
 //
 // The basic transaction that is broadcasted on the network and contained in
 // blocks.  A transaction can contain multiple inputs and outputs.
@@ -466,7 +468,7 @@ public:
                 return false;
 
         bool fNewer = false;
-        unsigned int nLowest = UINT_MAX;
+        unsigned int nLowest = std::numeric_limits<unsigned int>::max();
         for (int i = 0; i < vin.size(); i++)
         {
             if (vin[i].nSequence != old.vin[i].nSequence)
@@ -491,27 +493,35 @@ public:
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
 
-    int GetSigOpCount() const
-    {
-        int n = 0;
-        BOOST_FOREACH(const CTxIn& txin, vin)
-            n += txin.scriptSig.GetSigOpCount();
-        BOOST_FOREACH(const CTxOut& txout, vout)
-            n += txout.scriptPubKey.GetSigOpCount();
-        return n;
-    }
+    /** Check for standard transaction types
+        @return True if all outputs (scriptPubKeys) use only standard transaction forms
+    */
+    bool IsStandard() const;
 
-    bool IsStandard() const
-    {
-        BOOST_FOREACH(const CTxIn& txin, vin)
-            if (!txin.scriptSig.IsPushOnly())
-                return error("nonstandard txin: %s", txin.scriptSig.ToString().c_str());
-        BOOST_FOREACH(const CTxOut& txout, vout)
-            if (!::IsStandard(txout.scriptPubKey))
-                return error("nonstandard txout: %s", txout.scriptPubKey.ToString().c_str());
-        return true;
-    }
+    /** Check for standard transaction types
+        @param[in] mapInputs	Map of previous transactions that have outputs we're spending
+        @return True if all inputs (scriptSigs) use only standard transaction forms
+        @see CTransaction::FetchInputs
+    */
+    bool AreInputsStandard(const MapPrevTx& mapInputs) const;
 
+    /** Count ECDSA signature operations the old-fashioned (pre-0.6) way
+        @return number of sigops this transaction's outputs will produce when spent
+        @see CTransaction::FetchInputs
+    */
+    int GetLegacySigOpCount() const;
+
+    /** Count ECDSA signature operations in pay-to-script-hash inputs.
+
+        @param[in] mapInputs	Map of previous transactions that have outputs we're spending
+        @return maximum number of sigops required to validate this transaction's inputs
+        @see CTransaction::FetchInputs
+     */
+    int GetP2SHSigOpCount(const MapPrevTx& mapInputs) const;
+
+    /** Amount of bitcoins spent by this transaction.
+        @return sum of all outputs (note: does not include fees)
+     */
     int64 GetValueOut() const
     {
         int64 nValueOut = 0;
@@ -524,6 +534,16 @@ public:
         return nValueOut;
     }
 
+    /** Amount of bitcoins coming in to this transaction
+        Note that lightweight clients may not know anything besides the hash of previous transactions,
+        so may not be able to calculate this.
+
+        @param[in] mapInputs	Map of previous transactions that have outputs we're spending
+        @return	Sum of value of all inputs (scriptSigs)
+        @see CTransaction::FetchInputs
+     */
+    int64 GetValueIn(const MapPrevTx& mapInputs) const;
+
     static bool AllowFree(double dPriority)
     {
         // Large (in bytes) low-priority (new, small-coin) transactions
@@ -531,10 +551,10 @@ public:
         return dPriority > COIN * 576 / 250; // Litecoin: 576 blocks found a day. Priority cutoff is 1 litecoin day / 250 bytes.
     }
 
-    int64 GetMinFee(unsigned int nBlockSize=1, bool fAllowFree=true, bool fForRelay=false) const
+    int64 GetMinFee(unsigned int nBlockSize=1, bool fAllowFree=true, enum GetMinFee_mode mode=GMF_BLOCK) const
     {
         // Base fee is either MIN_TX_FEE or MIN_RELAY_TX_FEE
-        int64 nBaseFee = fForRelay ? MIN_RELAY_TX_FEE : MIN_TX_FEE;
+        int64 nBaseFee = (mode == GMF_RELAY) ? MIN_RELAY_TX_FEE : MIN_TX_FEE;
 
         unsigned int nBytes = ::GetSerializeSize(*this, SER_NETWORK);
         unsigned int nNewBlockSize = nBlockSize + nBytes;
@@ -637,13 +657,42 @@ public:
     bool ReadFromDisk(CTxDB& txdb, COutPoint prevout);
     bool ReadFromDisk(COutPoint prevout);
     bool DisconnectInputs(CTxDB& txdb);
-    bool ConnectInputs(CTxDB& txdb, std::map<uint256, CTxIndex>& mapTestPool, CDiskTxPos posThisTx,
-                       CBlockIndex* pindexBlock, int64& nFees, bool fBlock, bool fMiner, int64 nMinFee=0);
+
+    /** Fetch from memory and/or disk. inputsRet keys are transaction hashes.
+
+     @param[in] txdb	Transaction database
+     @param[in] mapTestPool	List of pending changes to the transaction index database
+     @param[in] fBlock	True if being called to add a new best-block to the chain
+     @param[in] fMiner	True if being called by CreateNewBlock
+     @param[out] inputsRet	Pointers to this transaction's inputs
+     @param[out] fInvalid	returns true if transaction is invalid
+     @return	Returns true if all inputs are in txdb or mapTestPool
+     */
+    bool FetchInputs(CTxDB& txdb, const std::map<uint256, CTxIndex>& mapTestPool,
+                     bool fBlock, bool fMiner, MapPrevTx& inputsRet, bool& fInvalid);
+
+    /** Sanity check previous transactions, then, if all checks succeed,
+        mark them as spent by this transaction.
+
+        @param[in] inputs	Previous transactions (from FetchInputs)
+        @param[out] mapTestPool	Keeps track of inputs that need to be updated on disk
+        @param[in] posThisTx	Position of this transaction on disk
+        @param[in] pindexBlock
+        @param[in] fBlock	true if called from ConnectBlock
+        @param[in] fMiner	true if called from CreateNewBlock
+        @param[in] fStrictPayToScriptHash	true if fully validating p2sh transactions
+        @return Returns true if all checks succeed
+     */
+    bool ConnectInputs(MapPrevTx inputs,
+                       std::map<uint256, CTxIndex>& mapTestPool, const CDiskTxPos& posThisTx,
+                       const CBlockIndex* pindexBlock, bool fBlock, bool fMiner, bool fStrictPayToScriptHash=true);
     bool ClientConnectInputs();
     bool CheckTransaction() const;
     bool AcceptToMemoryPool(CTxDB& txdb, bool fCheckInputs=true, bool* pfMissingInputs=NULL);
     bool AcceptToMemoryPool(bool fCheckInputs=true, bool* pfMissingInputs=NULL);
+
 protected:
+    const CTxOut& GetOutputFor(const CTxIn& input, const MapPrevTx& inputs) const;
     bool AddToMemoryPoolUnchecked();
 public:
     bool RemoveFromMemoryPool();
@@ -696,8 +745,8 @@ public:
 
 
     int SetMerkleBranch(const CBlock* pblock=NULL);
-    int GetDepthInMainChain(int& nHeightRet) const;
-    int GetDepthInMainChain() const { int nHeight; return GetDepthInMainChain(nHeight); }
+    int GetDepthInMainChain(CBlockIndex* &pindexRet) const;
+    int GetDepthInMainChain() const { CBlockIndex *pindexRet; return GetDepthInMainChain(pindexRet); }
     bool IsInMainChain() const { return GetDepthInMainChain() > 0; }
     int GetBlocksToMaturity() const;
     bool AcceptToMemoryPool(CTxDB& txdb, bool fCheckInputs=true);
@@ -759,6 +808,7 @@ public:
         return !(a == b);
     }
     int GetDepthInMainChain() const;
+ 
 };
 
 
@@ -854,13 +904,7 @@ public:
         return (int64)nTime;
     }
 
-    int GetSigOpCount() const
-    {
-        int n = 0;
-        BOOST_FOREACH(const CTransaction& tx, vtx)
-            n += tx.GetSigOpCount();
-        return n;
-    }
+    void UpdateTime(const CBlockIndex* pindexPrev);
 
 
     uint256 BuildMerkleTree() const
@@ -997,6 +1041,9 @@ public:
     bool AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos);
     bool CheckBlock() const;
     bool AcceptBlock();
+
+private:
+    bool SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew);
 };
 
 
@@ -1272,6 +1319,11 @@ public:
             Set((*mi).second);
     }
 
+    CBlockLocator(const std::vector<uint256>& vHaveIn)
+    {
+        vHave = vHaveIn;
+    }
+
     IMPLEMENT_SERIALIZE
     (
         if (!(nType & SER_GETHASH))
@@ -1530,6 +1582,7 @@ public:
 
     bool AppliesTo(int nVersion, std::string strSubVerIn) const
     {
+        // TODO: rework for client-version-embedded-in-strSubVer ?
         return (IsInEffect() &&
                 nMinVer <= nVersion && nVersion <= nMaxVer &&
                 (setSubVer.empty() || setSubVer.count(strSubVerIn)));
@@ -1537,7 +1590,7 @@ public:
 
     bool AppliesToMe() const
     {
-        return AppliesTo(VERSION, ::pszSubVer);
+        return AppliesTo(PROTOCOL_VERSION, FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<std::string>()));
     }
 
     bool RelayTo(CNode* pnode) const

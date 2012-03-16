@@ -58,6 +58,8 @@ public:
     bool inInitialBlockDownload() const;
     //! Return conservative estimate of total number of blocks, or 0 if unknown
     int getNumBlocksOfPeers() const;
+    //! Return warnings to be displayed in status bar
+    QString getStatusBarWarnings() const;
 
     void setMining(MiningType type, bool mining, int threads, int hashrate);
 

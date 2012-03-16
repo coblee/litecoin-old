@@ -10,6 +10,7 @@ CXX=llvm-g++
 DEPSDIR=/opt/local
 
 INCLUDEPATHS= \
+ -I"$(CURDIR)" \
  -I"$(DEPSDIR)/include" \
  -I"$(DEPSDIR)/include/db48"
 
@@ -22,6 +23,8 @@ USE_UPNP:=1
 LIBS= -dead_strip
 ifdef STATIC
 # Build STATIC if you are redistributing the bitcoind binary
+TESTLIBS += \
+ $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
 LIBS += \
  $(DEPSDIR)/lib/db48/libdb_cxx-4.8.a \
  $(DEPSDIR)/lib/libboost_system-mt.a \
@@ -30,8 +33,10 @@ LIBS += \
  $(DEPSDIR)/lib/libboost_thread-mt.a \
  $(DEPSDIR)/lib/libssl.a \
  $(DEPSDIR)/lib/libcrypto.a \
- $(DEPSDIR)/lib/libz.dylib
+ -lz
 else
+TESTLIBS += \
+ -lboost_unit_test_framework-mt
 LIBS += \
  -ldb_cxx-4.8 \
  -lboost_system-mt \
@@ -39,42 +44,24 @@ LIBS += \
  -lboost_program_options-mt \
  -lboost_thread-mt \
  -lssl \
- -lcrypto
+ -lcrypto \
+ -lz
+TESTDEFS += -DBOOST_TEST_DYN_LINK
 endif
 
 DEFS=-DMAC_OSX -DMSG_NOSIGNAL=0 -DUSE_SSL
 
 DEBUGFLAGS=-g
 # ppc doesn't work because we don't support big-endian
-#CFLAGS=-mmacosx-version-min=10.5 -arch i386 -O3 -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
-CFLAGS=-mmacosx-version-min=10.5 -arch x86_64 -O3 -Wno-invalid-offsetof -Wformat $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
-HEADERS = \
-    base58.h \
-    bignum.h \
-    checkpoints.h \
-    crypter.h \
-    db.h \
-    headers.h \
-    init.h \
-    irc.h \
-    key.h \
-    keystore.h \
-    main.h \
-    net.h \
-    noui.h \
-    protocol.h \
-    bitcoinrpc.h \
-    script.h \
-    scrypt.h \
-    serialize.h \
-    strlcpy.h \
-    uint256.h \
-    util.h \
-    wallet.h
+CFLAGS=-mmacosx-version-min=10.5 -arch i386 -O3 \
+    -Wextra -Wno-sign-compare -Wno-char-subscripts -Wno-invalid-offsetof -Wformat-security \
+    $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
 
 OBJS= \
     obj/checkpoints.o \
+    obj/netbase.o \
     obj/crypter.o \
+    obj/key.o \
     obj/db.o \
     obj/init.o \
     obj/irc.o \
@@ -83,6 +70,7 @@ OBJS= \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \
+    obj/rpcdump.o \
     obj/script.o \
     obj/scrypt.o \
     obj/util.o \
@@ -97,41 +85,40 @@ else
 endif
 endif
 
-
 all: litecoind
 
 # auto-generated dependencies:
--include obj/nogui/*.P
--include obj/test/*.P
+-include obj/*.P
+-include obj-test/*.P
 
-obj/nogui/scrypt.o: scrypt.c
-	gcc -c -o $@ $^
+obj/scrypt.o: scrypt.c
+        gcc -c -o $@ $^
 
-obj/nogui/%.o: %.cpp
+obj/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
 
-litecoind: $(OBJS:obj/%=obj/nogui/%)
+litecoind: $(OBJS:obj/%=obj/%)
 	$(CXX) $(CFLAGS) -o $@ $(LIBPATHS) $^ $(LIBS)
 
-obj/test/%.o: test/%.cpp
-	$(CXX) -c $(CFLAGS) -MMD -o $@ $<
+TESTOBJS := $(patsubst test/%.cpp,obj-test/%.o,$(wildcard test/*.cpp))
+
+obj-test/%.o: test/%.cpp
+	$(CXX) -c $(TESTDEFS) $(CFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
 
-test_bitcoin: obj/test/test_bitcoin.o $(filter-out obj/nogui/init.o,$(OBJS:obj/%=obj/nogui/%))
-	$(CXX) $(CFLAGS) -o $@ $(LIBPATHS) $^ $(LIBS) $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
+test_bitcoin: $(TESTOBJS) $(filter-out obj/init.o,$(OBJS:obj/%=obj/%))
+	$(CXX) $(CFLAGS) -o $@ $(LIBPATHS) $^ $(LIBS) $(TESTLIBS)
 
 clean:
 	-rm -f litecoind test_bitcoin
 	-rm -f obj/*.o
-	-rm -f obj/nogui/*.o
-	-rm -f obj/test/*.o
+	-rm -f obj-test/*.o
 	-rm -f obj/*.P
-	-rm -f obj/nogui/*.P
-	-rm -f obj/test/*.P
+	-rm -f obj-test/*.P

@@ -22,6 +22,7 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     numBlocksAtStartup = -1;
 
     // Read our specific settings from the wallet db
+    /*
     CWalletDB walletdb(optionsModel->getWallet()->strWalletFile);
     walletdb.ReadSetting("miningDebug", miningDebug);
     walletdb.ReadSetting("miningScanTime", miningScanTime);
@@ -34,18 +35,18 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     miningUsername = QString::fromStdString(str);
     walletdb.ReadSetting("miningPassword", str);
     miningPassword = QString::fromStdString(str);
-
-    if (fGenerateBitcoins)
-    {
+    */
+//    if (fGenerateBitcoins)
+//    {
         miningType = SoloMining;
         miningStarted = true;
-    }
-    else
-    {
-        miningType = PoolMining;
-        walletdb.ReadSetting("miningStarted", miningStarted);
-    }
-    miningThreads = nLimitProcessors;
+//    }
+//    else
+//    {
+//        miningType = PoolMining;
+//        walletdb.ReadSetting("miningStarted", miningStarted);
+//    }
+//    miningThreads = nLimitProcessors;
 }
 
 int ClientModel::getNumConnections() const
@@ -87,7 +88,7 @@ bool ClientModel::getMiningDebug() const
 void ClientModel::setMiningDebug(bool debug)
 {
     miningDebug = debug;
-    WriteSetting("miningDebug", miningDebug);
+//    WriteSetting("miningDebug", miningDebug);
 }
 
 int ClientModel::getMiningScanTime() const
@@ -98,7 +99,7 @@ int ClientModel::getMiningScanTime() const
 void ClientModel::setMiningScanTime(int scantime)
 {
     miningScanTime = scantime;
-    WriteSetting("miningScanTime", miningScanTime);
+//    WriteSetting("miningScanTime", miningScanTime);
 }
 
 QString ClientModel::getMiningServer() const
@@ -109,7 +110,7 @@ QString ClientModel::getMiningServer() const
 void ClientModel::setMiningServer(QString server)
 {
     miningServer = server;
-    WriteSetting("miningServer", miningServer.toStdString());
+//    WriteSetting("miningServer", miningServer.toStdString());
 }
 
 QString ClientModel::getMiningPort() const
@@ -120,7 +121,7 @@ QString ClientModel::getMiningPort() const
 void ClientModel::setMiningPort(QString port)
 {
     miningPort = port;
-    WriteSetting("miningPort", miningPort.toStdString());
+//    WriteSetting("miningPort", miningPort.toStdString());
 }
 
 QString ClientModel::getMiningUsername() const
@@ -131,7 +132,7 @@ QString ClientModel::getMiningUsername() const
 void ClientModel::setMiningUsername(QString username)
 {
     miningUsername = username;
-    WriteSetting("miningUsername", miningUsername.toStdString());
+//    WriteSetting("miningUsername", miningUsername.toStdString());
 }
 
 QString ClientModel::getMiningPassword() const
@@ -142,7 +143,7 @@ QString ClientModel::getMiningPassword() const
 void ClientModel::setMiningPassword(QString password)
 {
     miningPassword = password;
-    WriteSetting("miningPassword", miningPassword.toStdString());
+//    WriteSetting("miningPassword", miningPassword.toStdString());
 }
 
 int ClientModel::getHashrate() const
@@ -226,14 +227,19 @@ void ClientModel::setMining(MiningType type, bool mining, int threads, int hashr
 {
     if (type == SoloMining && mining != miningStarted)
     {
-            GenerateBitcoins(mining ? 1 : 0, getOptionsModel()->getWallet());
+//            GenerateBitcoins(mining ? 1 : 0, getOptionsModel()->getWallet());
     }
     miningType = type;
     miningStarted = mining;
-    WriteSetting("miningStarted", mining);
-    WriteSetting("fLimitProcessors", 1);
-    WriteSetting("nLimitProcessors", threads);
+//    WriteSetting("miningStarted", mining);
+//    WriteSetting("fLimitProcessors", 1);
+//    WriteSetting("nLimitProcessors", threads);
     emit miningChanged(mining, hashrate);
+}
+
+QString ClientModel::getStatusBarWarnings() const
+{
+    return QString::fromStdString(GetWarnings("statusbar"));
 }
 
 OptionsModel *ClientModel::getOptionsModel()

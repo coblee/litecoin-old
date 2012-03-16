@@ -47,48 +47,35 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             //
             // Credit
             //
-            TransactionRecord sub(hash, nTime);
-
-            sub.credit = nNet;
-
-            if (wtx.IsCoinBase())
+            BOOST_FOREACH(const CTxOut& txout, wtx.vout)
             {
-                // Generated
-                sub.type = TransactionRecord::Generated;
-
-                if (nCredit == 0)
+                if(wallet->IsMine(txout))
                 {
-                    int64 nUnmatured = 0;
-                    BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-                        nUnmatured += wallet->GetCredit(txout);
-                    sub.credit = nUnmatured;
-                }
-            }
-            else if (!mapValue["from"].empty() || !mapValue["message"].empty())
-            {
-                // Received by IP connection
-                sub.type = TransactionRecord::RecvFromIP;
-                if (!mapValue["from"].empty())
-                    sub.address = mapValue["from"];
-            }
-            else
-            {
-                // Received by Bitcoin Address
-                sub.type = TransactionRecord::RecvWithAddress;
-                BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-                {
-                    if(wallet->IsMine(txout))
+                    TransactionRecord sub(hash, nTime);
+                    CBitcoinAddress address;
+                    sub.idx = parts.size(); // sequence number
+                    sub.credit = txout.nValue;
+                    if (wtx.IsCoinBase())
                     {
-                        CBitcoinAddress address;
-                        if (ExtractAddress(txout.scriptPubKey, wallet, address))
-                        {
-                            sub.address = address.ToString();
-                        }
-                        break;
+                        // Generated
+                        sub.type = TransactionRecord::Generated;
                     }
+                    else if (ExtractAddress(txout.scriptPubKey, address) && wallet->HaveKey(address))
+                    {
+                        // Received by Bitcoin Address
+                        sub.type = TransactionRecord::RecvWithAddress;
+                        sub.address = address.ToString();
+                    }
+                    else
+                    {
+                        // Received by IP connection (deprecated features), or a multisignature or other non-simple transaction
+                        sub.type = TransactionRecord::RecvFromOther;
+                        sub.address = mapValue["from"];
+                    }
+
+                    parts.append(sub);
                 }
             }
-            parts.append(sub);
         }
         else
         {
@@ -127,21 +114,19 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                         // from a transaction sent back to our own address.
                         continue;
                     }
-                    else if(!mapValue["to"].empty())
-                    {
-                        // Sent to IP
-                        sub.type = TransactionRecord::SendToIP;
-                        sub.address = mapValue["to"];
-                    }
-                    else
+
+                    CBitcoinAddress address;
+                    if (ExtractAddress(txout.scriptPubKey, address))
                     {
                         // Sent to Bitcoin Address
                         sub.type = TransactionRecord::SendToAddress;
-                        CBitcoinAddress address;
-                        if (ExtractAddress(txout.scriptPubKey, 0, address))
-                        {
-                            sub.address = address.ToString();
-                        }
+                        sub.address = address.ToString();
+                    }
+                    else
+                    {
+                        // Sent to IP, or other non-address transaction like OP_EVAL
+                        sub.type = TransactionRecord::SendToOther;
+                        sub.address = mapValue["to"];
                     }
 
                     int64 nValue = txout.nValue;
@@ -187,7 +172,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
 
     // Sort order, unrecorded transactions sort to the top
     status.sortKey = strprintf("%010d-%01d-%010u-%03d",
-        (pindex ? pindex->nHeight : INT_MAX),
+        (pindex ? pindex->nHeight : std::numeric_limits<int>::max()),
         (wtx.IsCoinBase() ? 1 : 0),
         wtx.nTimeReceived,
         idx);

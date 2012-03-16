@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2011 The Bitcoin developers
+// Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_DB_H
@@ -13,17 +13,17 @@
 
 #include <db_cxx.h>
 
-class CTxIndex;
-class CDiskBlockIndex;
-class CDiskTxPos;
-class COutPoint;
-class CAddress;
-class CWalletTx;
-class CWallet;
 class CAccount;
 class CAccountingEntry;
+class CAddress;
 class CBlockLocator;
-
+class CDiskBlockIndex;
+class CDiskTxPos;
+class CMasterKey;
+class COutPoint;
+class CTxIndex;
+class CWallet;
+class CWalletTx;
 
 extern unsigned int nWalletDBUpdated;
 extern DbEnv dbenv;
@@ -420,6 +420,19 @@ public:
         return Write(std::make_pair(std::string("mkey"), nID), kMasterKey, true);
     }
 
+    // Support for BIP 0013 : see https://en.bitcoin.it/wiki/BIP_0013
+    bool ReadCScript(const uint160 &hash, CScript& redeemScript)
+    {
+        redeemScript.clear();
+        return Read(std::make_pair(std::string("cscript"), hash), redeemScript);
+    }
+
+    bool WriteCScript(const uint160& hash, const CScript& redeemScript)
+    {
+        nWalletDBUpdated++;
+        return Write(std::make_pair(std::string("cscript"), hash), redeemScript, false);
+    }
+
     bool WriteBestBlock(const CBlockLocator& locator)
     {
         nWalletDBUpdated++;
@@ -460,17 +473,28 @@ public:
         return Erase(std::make_pair(std::string("pool"), nPool));
     }
 
+    // Settings are no longer stored in wallet.dat; these are
+    // used only for backwards compatibility:
     template<typename T>
     bool ReadSetting(const std::string& strKey, T& value)
     {
         return Read(std::make_pair(std::string("setting"), strKey), value);
     }
-
     template<typename T>
     bool WriteSetting(const std::string& strKey, const T& value)
     {
         nWalletDBUpdated++;
         return Write(std::make_pair(std::string("setting"), strKey), value);
+    }
+    bool EraseSetting(const std::string& strKey)
+    {
+        nWalletDBUpdated++;
+        return Erase(std::make_pair(std::string("setting"), strKey));
+    }
+
+    bool WriteMinVersion(int nVersion)
+    {
+        return Write(std::string("minversion"), nVersion);
     }
 
     bool ReadAccount(const std::string& strAccount, CAccount& account);
