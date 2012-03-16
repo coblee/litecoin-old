@@ -1038,7 +1038,7 @@ void MapPort(bool /* unused fMapPort */)
 
 
 
-static const char *strDNSSeed[] = {
+static const char *strDNSSeed[][2] = {
     "litecoin.org",
     "litecoin.andykellett.com",
 };
