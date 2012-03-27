@@ -803,7 +803,10 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
         // Get cursor
         Dbc* pcursor = GetCursor();
         if (!pcursor)
+        {
+            printf("Error getting wallet database cursor\n");
             return DB_CORRUPT;
+        }
 
         loop
         {
@@ -814,7 +817,10 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
             if (ret == DB_NOTFOUND)
                 break;
             else if (ret != 0)
+            {
+                printf("Error reading next record from wallet database\n");
                 return DB_CORRUPT;
+            }
 
             // Unserialize
             // Taking advantage of the fact that pair serialization
@@ -894,11 +900,22 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
                     ssValue >> wkey;
                     key.SetPubKey(vchPubKey);
                     key.SetPrivKey(wkey.vchPrivKey);
-                    if (key.GetPubKey() != vchPubKey || !key.IsValid())
+                    if (key.GetPubKey() != vchPubKey)
+                    {
+                        printf("Error reading wallet database: CWalletKey pubkey inconsistency\n");
                         return DB_CORRUPT;
+                    }
+                    if (!key.IsValid())
+                    {
+                        printf("Error reading wallet database: invalid CWalletKey\n");
+                        return DB_CORRUPT;
+                    }
                 }
                 if (!pwallet->LoadKey(key))
+                {
+                    printf("Error reading wallet database: LoadKey failed\n");
                     return DB_CORRUPT;
+                }
             }
             else if (strType == "mkey")
             {
@@ -907,7 +924,10 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
                 CMasterKey kMasterKey;
                 ssValue >> kMasterKey;
                 if(pwallet->mapMasterKeys.count(nID) != 0)
+                {
+                    printf("Error reading wallet database: duplicate CMasterKey id %u\n", nID);
                     return DB_CORRUPT;
+                }
                 pwallet->mapMasterKeys[nID] = kMasterKey;
                 if (pwallet->nMasterKeyMaxID < nID)
                     pwallet->nMasterKeyMaxID = nID;
@@ -919,7 +939,10 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
                 vector<unsigned char> vchPrivKey;
                 ssValue >> vchPrivKey;
                 if (!pwallet->LoadCryptedKey(vchPubKey, vchPrivKey))
+                {
+                    printf("Error reading wallet database: LoadCryptedKey failed\n");
                     return DB_CORRUPT;
+                }
                 fIsEncrypted = true;
             }
             else if (strType == "defaultkey")
@@ -953,7 +976,10 @@ int CWalletDB::LoadWallet(CWallet* pwallet)
                 CScript script;
                 ssValue >> script;
                 if (!pwallet->LoadCScript(script))
+                {
+                    printf("Error reading wallet database: LoadCScript failed\n");
                     return DB_CORRUPT;
+                }
             }
         }
         pcursor->close();
