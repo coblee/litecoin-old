@@ -26,6 +26,7 @@ with the double-sha256 of the public key as the IV, and the
 master key's key as the encryption key (see keystore.[ch]).
 */
 
+/** Master key for wallet encryption */
 class CMasterKey
 {
 public:
@@ -59,6 +60,7 @@ public:
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;
 
+/** Encryption/decryption context with key information */
 class CCrypter
 {
 private:
