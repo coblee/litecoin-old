@@ -12,14 +12,14 @@
 
 #include "util.h"
 
+/** Errors thrown by the bignum class */
 class bignum_error : public std::runtime_error
 {
 public:
     explicit bignum_error(const std::string& str) : std::runtime_error(str) {}
 };
 
-
-
+/** RAII encapsulated BN_CTX (OpenSSL bignum context) */
 class CAutoBN_CTX
 {
 protected:
