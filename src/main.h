@@ -971,10 +971,10 @@ public:
         fileout << FLATDATA(pchMessageStart) << nSize;
 
         // Write block
-        nBlockPosRet = ftell(fileout);
-        if (nBlockPosRet == -1)
+        long fileOutPos = ftell(fileout);
+        if (fileOutPos < 0)
             return error("CBlock::WriteToDisk() : ftell failed");
-        fileout << *this;
+        nBlockPosRet = fileOutPos;
 
         // Flush stdio buffers and commit to disk before returning
         fflush(fileout);
