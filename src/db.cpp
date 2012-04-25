@@ -29,6 +29,7 @@ static bool fDbEnvInit = false;
 DbEnv dbenv(0);
 static map<string, int> mapFileUseCount;
 static map<string, Db*> mapDb;
+static int64 nTxn = 0;
 
 static void EnvShutdown()
 {
@@ -88,12 +89,13 @@ CDB::CDB(const char* pszFile, const char* pszMode) : pdb(NULL)
             int nDbCache = GetArg("-dbcache", 25);
             dbenv.set_lg_dir(strLogDir.c_str());
             dbenv.set_cachesize(nDbCache / 1024, (nDbCache % 1024)*1048576, 1);
-            dbenv.set_lg_bsize(10485760);
-            dbenv.set_lg_max(104857600);
+            dbenv.set_lg_bsize(1048576);
+            dbenv.set_lg_max(10485760);
             dbenv.set_lk_max_locks(10000);
             dbenv.set_lk_max_objects(10000);
             dbenv.set_errfile(fopen(strErrorFile.c_str(), "a")); /// debug
             dbenv.set_flags(DB_AUTO_COMMIT, 1);
+            dbenv.log_set_config(DB_LOG_AUTO_REMOVE, 1);
             ret = dbenv.open(strDataDir.c_str(),
                              DB_CREATE     |
                              DB_INIT_LOCK  |
@@ -160,12 +162,15 @@ void CDB::Close()
         nMinutes = 1;
     if (strFile == "addr.dat")
         nMinutes = 2;
-    if (strFile == "blkindex.dat" && IsInitialBlockDownload() && nBestHeight % 5000 != 0)
-        nMinutes = 1;
-    dbenv.txn_checkpoint(0, nMinutes, 0);
-
-    CRITICAL_BLOCK(cs_db)
-        --mapFileUseCount[strFile];
+    if (strFile == "blkindex.dat" && IsInitialBlockDownload())
+        nMinutes = 5;
+    
+    if (nMinutes == 0 || nTxn > 200000)
+    {
+        nTxn = 0;
+        nMinutes = 0;
+    }
+  
 }
 
 void static CloseDb(const string& strFile)
@@ -336,6 +341,7 @@ bool CTxDB::ReadTxIndex(uint256 hash, CTxIndex& txindex)
 bool CTxDB::UpdateTxIndex(uint256 hash, const CTxIndex& txindex)
 {
     assert(!fClient);
+    nTxn++;
     return Write(make_pair(string("tx"), hash), txindex);
 }
 
@@ -346,6 +352,7 @@ bool CTxDB::AddTxIndex(const CTransaction& tx, const CDiskTxPos& pos, int nHeigh
     // Add to tx index
     uint256 hash = tx.GetHash();
     CTxIndex txindex(pos, tx.vout.size());
+    nTxn++;
     return Write(make_pair(string("tx"), hash), txindex);
 }
 
