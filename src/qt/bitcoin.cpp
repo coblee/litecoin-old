@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
     } catch (std::exception& e) {
         handleRunawayException(&e);
     } catch (...) {
-        handleRunawayException(&e);
+        handleRunawayException(NULL);
     }
     return 0;
 }
