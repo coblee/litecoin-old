@@ -974,6 +974,7 @@ public:
         long fileOutPos = ftell(fileout);
         if (fileOutPos < 0)
             return error("CBlock::WriteToDisk() : ftell failed");
+        fileout << *this;
         nBlockPosRet = fileOutPos;
 
         // Flush stdio buffers and commit to disk before returning
