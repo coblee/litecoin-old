@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     // Do this early as we don't want to bother initializing if we are just calling IPC
     for (int i = 1; i < argc; i++)
     {
-        if (strlen(argv[i]) > 7 && strncasecmp(argv[i], "bitcoin:", 8) == 0)
+        if (strlen(argv[i]) > 8 && strncasecmp(argv[i], "litecoin:", 9) == 0)
         {
             const char *strURL = argv[i];
             try {
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
                 // Check for URL in argv
                 for (int i = 1; i < argc; i++)
                 {
-                    if (strlen(argv[i]) > 7 && strncasecmp(argv[i], "bitcoin:", 8) == 0)
+                    if (strlen(argv[i]) > 8 && strncasecmp(argv[i], "litecoin:", 9) == 0)
                     {
                         const char *strURL = argv[i];
                         try {

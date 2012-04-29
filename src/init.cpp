@@ -280,7 +280,7 @@ bool AppInit2(int argc, char* argv[])
 
 #ifndef QT_GUI
     for (int i = 1; i < argc; i++)
-        if (!IsSwitchChar(argv[i][0]) && !(strlen(argv[i]) > 7 && strncasecmp(argv[i], "bitcoin:", 8) == 0))
+        if (!IsSwitchChar(argv[i][0]) && !(strlen(argv[i]) > 8 && strncasecmp(argv[i], "litecoin:", 9) == 0))
             fCommandLine = true;
 
     if (fCommandLine)
