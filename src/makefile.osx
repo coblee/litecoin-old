@@ -92,8 +92,15 @@ all: litecoind
 -include obj/*.P
 -include obj-test/*.P
 
-obj/scrypt.o: scrypt.c
-	gcc -c -o $@ $^
+#obj/scrypt.o: scrypt.c
+#	gcc -c -o $@ $^
+
+obj/%.o: %.c
+	gcc -c $(CFLAGS) -MMD -o $@ $<
+	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
+	  rm -f $(@:%.o=%.d)
 
 obj/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -MMD -o $@ $<
