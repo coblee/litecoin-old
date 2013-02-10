@@ -1,3 +1,22 @@
+NovaCoin 0.2.2 - experimental decentralized cryptocurrency
+
+Intro
+-----
+NovaCoin is a free open source project derived from Bitcoin and PPCoin, with
+the goal of providing another long-term energy-efficient crypto-currency.
+
+Consult https://github.com/CryptoManiac/novacoin/wiki for more information.
+
+Copyright (c) NovaCoin Developers
+Copyright (c) PPCoin Developers
+Copyright (c) 2009-2012 Bitcoin Developers
+Distributed under the MIT/X11 software license, see the accompanying
+file license.txt or http://www.opensource.org/licenses/mit-license.php.
+This product includes software developed by the OpenSSL Project for use in
+the OpenSSL Toolkit (http://www.openssl.org/).  This product includes
+cryptographic software written by Eric Young (eay@cryptsoft.com).
+
+
 PPCoin 0.2.2 BETA
 
 Copyright (c) 2011-2012 PPCoin Developers
