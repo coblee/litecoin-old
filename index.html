@@ -3,6 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Litecoin</title>
+<meta name="description" content="Litecoin is a cryptocurrency that enables instant payments to anyone in the world and that can be efficiently mined with consumer-grade hardware.">
 <link type="text/css" rel="stylesheet" media="screen" href="reset.css" />
 <link type="text/css" rel="stylesheet" media="screen" href="style.css" />
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
@@ -43,9 +44,8 @@
     	<div id="right">
             <div id="intro">
                     <h1>What is <em>Litecoin</em>?</h1>
-                    <h2 style="margin-bottom:25px;">Litecoin is the result of some of us who joined together on IRC in an effort to create a real alternative currency similar to Bitcoin. We wanted to make a coin that is silver to Bitcoin's gold.<br /><br />
-				    Litecoin manages to maintain the unique traits and attributes of Bitcoin, while adding to the mixture CPU-specific mining and a 2.5 minute block rate. This means that Litecoin doesn't have to compete for the used up computational cycles of your graphics card if you're already mining Bitcoins, but can work independently on your processor.<br /><br />
-					We'd like everyone to get their chance at being an <em>"early adopter"</em>, so we've preannounced Litecoin several days ahead of launch day for you to be able to prepare your mining setup on our Testnet. There have also been no more than two blocks mined ahead of release; the genesis block followed by a block to verify it.
+                    <h2 style="margin-bottom:25px;">Litecoin is a peer-to-peer Internet currency that enables instant payments to anyone in the world. It differs from its parent Bitcoin in that can be efficiently mined with consumer-grade hardware. Litecoin provides faster confirmations (targeted at every 2.5 minutes on average) and uses memory-hard, scrypt-based mining to target the CPUs and GPUs most people already have. The Litecoin network is scheduled to produce four times as many currency units as Bitcoin.<br /><br />
+				    One of the aims of Litecoin was to provide a mining algorithm that could run at the same time, on the same hardware used to mine bitcoins. With the rise of specialized ASICs for Bitcoin, Litecoin continues to satisify these goals. It is unlikely for FPGA or ASIC mining to take over Litecoin until the currency is widely used.
 				    </h2>
                     <div id="buttons">
 					<a href="https://github.com/litecoin-project/litecoin" class="button">Grab the source</a><div class="or">&nbsp;</div><a href="https://github.com/litecoin-project/litecoin/downloads" class="source">Download the client</a>
@@ -60,15 +60,15 @@
                 <div class="features">
                     <div class="first-column">
                         <h1><span class="icon"><img src="images/icons/whistle.png" alt=""/></span>Proof of Work</h1>
-                        <h2>Litecoin uses Scrypt as a proof-of-work scheme. Scrypt uses the low-latency cache memory of modern processors to provide greater hash-speeds on CPUs in comparison to GPUs. We would like to extend our thanks to ArtForz for the implementation.</h2>
+                        <h2>Litecoin uses scrypt in its proof-of-work algorithm which requires pseudorandom access to memory resources that were initially not avialable for GPU-based mining. Since this kind of memory is relatively expensive to add to FPGA and ASIC processors, Litecoin is unlikely to have such specialized processors developed for it until it is widely used.</h2>
                     </div>
                     <div class="second-column">
-                        <h1><span class="icon"><img src="images/icons/source.png" alt=""/></span>Open-Source</h1>
-                        <h2>We don't install trojans, wallet stealers or viruses on your computer. We don't withhold the source code from you. We don't hold millions of coins in storage. We don't collect a tax. Check out the source code. You don't have to trust us.</h2>
+                        <h1><span class="icon"><img src="images/icons/source.png" alt=""/></span>Free Software</h1>
+                        <h2>Litecoin is a free software project released under the MIT/X11 license which gives you the power to run, modify, and copy the software and to distribute, at your option, modified copies of the software. The software is released in a transparent process that allows for independent verification of binaries and their corresponding source code.</h2>
                     </div>
                     <div class="third-column">
                         <h1><span class="icon"><img src="images/icons/blockchain.png" alt=""/></span>Blockchain</h1>
-                        <h2>The Litecoin blockchain differs from its Bitcoin counterpart in that it tries to have smaller blocks, and generate them four times as fast as the Bitcoin network allows. This means that merchants get faster confirmations for their online products.</h2>
+                        <h2>The Litecoin blockchain differs from its Bitcoin counterpart in that it has more frequent blocks which at the beginning will have less transactions per block but will later support more transactions on the network without further modificaiton. While this means merchants get faster confirmations for their online products they still may want to wait for a sufficient number of confirmations for bigger ticket items.</h2>
                     </div>
                 </div>
                 <div class="features">
@@ -79,11 +79,11 @@
 
                     <div class="second-column">
                         <h1><span class="icon"><img src="images/icons/lock.png" alt=""/></span>Wallet Encryption</h1>
-                        <h2>Fresh from the Bitcoin codebase is encryption, which allows you to lock down only the private keys in your wallet, so that you can still see new transactions and your account balance, but are required to enter your encryption key in order to spend. This serves as not only a protection to dumb trojans, but also a sanity check before sending all your funds away.</h2>
+                        <h2>Fresh from the Bitcoin codebase is wallet encryption, which allows you to secure the private keys in your wallet, so that you can view transactions and your account balance, but are required to enter your password before spending your litecoins. This serves as not only a protection to viruses and trojans, but also a sanity check before sending payments.</h2>
                     </div>
                     <div class="third-column">
                         <h1><span class="icon"><img src="images/icons/coins.png" alt=""/></span>Reward</h1>
-                        <h2>Miners will generate 50 coins per block. In light of our faster blocks, to properly mimic Bitcoin's generation trajectory, the amount of coins generated gets halved every 840,000 blocks. For those of you doing the math, Litecoin is scheduled to produce roughly 4 times as many coins as Bitcoin, about 82 million litecoins.</h2>
+                        <h2>Miners will initially generate 50 coins per block. In light of our faster blocks and to properly mimic Bitcoin's generation trajectory, the amount of coins generated gets halved every 840,000 blocks. Litecoin is therefore scheduled to produce roughly 4 times as many units as Bitcoin, or about 84 million litecoins.</h2>
                     </div>
                </div>
             </div>
@@ -97,7 +97,7 @@
     </div>
     <div id="footer">
     	<div class="wrapper">
-        	<div class="alignleft">Copyright © 2011 <a href="http://litecoin.org/">litecoin.org</a>. All rights reserved.</div>
+        	<div class="alignleft">Copyright © 2013 <a href="http://litecoin.org/">litecoin.org</a>. All rights reserved.</div>
             <div class="alignright"></div>
         </div>
     </div>
